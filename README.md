@@ -1,0 +1,2 @@
+# routiner
+self esteem routiner
