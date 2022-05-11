@@ -1,2 +1,0 @@
-# routiner
-self esteem routiner
