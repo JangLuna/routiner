@@ -5,8 +5,8 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   type: 'mariadb',
   host: 'sidetrack-vflo.cwel20rl0x36.us-east-1.rds.amazonaws.com',
   port: 3306,
-  username: 'sidetrackmaster',
-  password: 'sidetrack0202',
+  username: '',
+  password: '',
   database: 'Routainer',
 
   //Entities to be loaded for this connections
