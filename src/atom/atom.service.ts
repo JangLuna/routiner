@@ -120,4 +120,14 @@ export class AtomService {
   }
 
   async editAtom() {}
+
+  async getAtomList(user: User): Promise<ResponseDto> {
+    const atomList = await this.atomRepository.find({
+      where: { registeredUser: user },
+    });
+
+    return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS', {
+      atomList,
+    });
+  }
 }

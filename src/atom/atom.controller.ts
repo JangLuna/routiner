@@ -34,8 +34,6 @@ export class AtomController {
     @Body('text') text: string,
     @Body('type', AtomTypeValidationPipe) type: AtomType,
   ) {
-    console.log(user);
-
     text = text.trim();
     if (text.length == 0) {
       throw new BadRequestException('text is empty.');
@@ -51,5 +49,11 @@ export class AtomController {
   @UseGuards(AuthGuard())
   deleteAtom(@GetUser() user: User, @Body('id') atomId: number) {
     return this.atomService.deleteAtom(user, atomId);
+  }
+
+  @Get('/get_atom_list')
+  @UseGuards(AuthGuard())
+  getAtomList(@GetUser() user: User) {
+    return this.atomService.getAtomList(user);
   }
 }

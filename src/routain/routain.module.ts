@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from 'src/auth/auth.module';
 import { RoutainLog } from 'src/entities/routain-log.entity';
 import { Routain } from 'src/entities/routain.entity';
 import { RoutainController } from './routain.controller';
@@ -8,6 +9,6 @@ import { RoutainService } from './routain.service';
 @Module({
   controllers: [RoutainController],
   providers: [RoutainService],
-  imports: [TypeOrmModule.forFeature([Routain, RoutainLog])],
+  imports: [TypeOrmModule.forFeature([Routain, RoutainLog]), AuthModule],
 })
 export class RoutainModule {}
