@@ -13,6 +13,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/decorators/get-user.decorator';
 import { CreateRoutainDto } from 'src/dto/create-routain.dto';
+import { UpdateRoutainDto } from 'src/dto/update-routain.dto';
 import { User } from 'src/entities/user.entity';
 import { RoutainService } from './routain.service';
 
@@ -56,5 +57,11 @@ export class RoutainController {
 
   @Patch('/update_routain')
   @UseGuards(AuthGuard())
-  updateRoutain(@GetUser() user: User) {}
+  @UsePipes(ValidationPipe)
+  updateRoutain(
+    @GetUser() user: User,
+    @Body() updateRoutainDto: UpdateRoutainDto,
+  ) {
+    return this.routainService.editRoutain(user, updateRoutainDto);
+  }
 }

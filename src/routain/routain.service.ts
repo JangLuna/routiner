@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { isIBAN } from 'class-validator';
 import { CreateRoutainDto } from 'src/dto/create-routain.dto';
 import { ResponseDto } from 'src/dto/response.dto';
+import { UpdateRoutainDto } from 'src/dto/update-routain.dto';
 import { Atom } from 'src/entities/atom.entity';
 import { RoutainLog } from 'src/entities/routain-log.entity';
 import { Routain } from 'src/entities/routain.entity';
@@ -51,6 +52,7 @@ export class RoutainService {
     let existAtomList: Atom[] = await this.atomRepository
       .createQueryBuilder()
       .whereInIds(parsedAtomIdList)
+      .where({ registeredUser: user })
       .getMany();
 
     if (parsedAtomIdList.length != existAtomList.length) {
@@ -93,7 +95,7 @@ export class RoutainService {
       await queryRunner.commitTransaction();
       return new ResponseDto(200, 'SUCCESS', false, 'SUCCESS', routain);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       await queryRunner.rollbackTransaction();
       return new ResponseDto(
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -142,6 +144,7 @@ export class RoutainService {
       await queryRunner.commitTransaction();
       return new ResponseDto(200, 'SUCCESS', false, 'SUCCESS', result);
     } catch (e) {
+      console.error(e);
       await queryRunner.rollbackTransaction();
       return new ResponseDto(
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -159,7 +162,89 @@ export class RoutainService {
 
   async stopRoutain() {}
 
-  async editRoutain() {}
+  async editRoutain(user: User, updateRoutainDto: UpdateRoutainDto) {
+    let { id, name, atomIdList, isUse } = updateRoutainDto;
+
+    let routain: Routain = await this.routainRepository.findOne({
+      relations: ['registeredUser'],
+      where: { id },
+    });
+
+    if (!routain) {
+      return new ResponseDto(
+        HttpStatus.NOT_FOUND,
+        'UNREGISTERED_ROUTAIN',
+        true,
+        'UNREGISTERED_ROUTAIN',
+      );
+    }
+
+    if (routain.registeredUser.idx !== user.idx) {
+      return new ResponseDto(
+        HttpStatus.UNAUTHORIZED,
+        'NOT_ROUTAIN_OWNER',
+        true,
+        'NOT_ROUTAIN_OWNER',
+      );
+    }
+
+    // 이름이 빈 문자열 아닐 때만 변경
+    routain.name = name.trim().length > 0 ? name : routain.name;
+    routain.isUse = isUse;
+    routain.atomOrderString = atomIdList.trim();
+
+    // 아톰 파싱
+    let parsedAtomIdList: number[] = atomIdList.trim().split(',').map(Number);
+
+    let existAtomList: Atom[] = await this.atomRepository
+      .createQueryBuilder()
+      .whereInIds(parsedAtomIdList)
+      .andWhere({ registeredUser: user })
+      .getMany();
+
+    if (parsedAtomIdList.length != existAtomList.length) {
+      return new ResponseDto(
+        HttpStatus.NOT_FOUND,
+        'UNREGISTERED_ATOM',
+        false,
+        'UNREGISTERED_ATOM',
+      );
+    }
+
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.save(routain);
+      await queryRunner.manager.delete(RoutainAtomPair, { routain });
+
+      // 루틴-아톰 페어 리스트 생성
+      let routainAtomPairList: RoutainAtomPair[] = [];
+      for (let i in existAtomList) {
+        let atom: Atom = existAtomList[i];
+        let pair = this.routainAtomPairRepository.create({ routain, atom });
+        routainAtomPairList.push(pair);
+      }
+
+      // 루틴-아톰 페어 리스트 저장
+      routainAtomPairList = await queryRunner.manager.save(routainAtomPairList);
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.error(e);
+      await queryRunner.rollbackTransaction();
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'INTERNAL_SERVER_ERROR',
+        true,
+        'INTERNAL_SERVER_ERROR',
+        e,
+      );
+    } finally {
+      await queryRunner.release();
+    }
+  }
 
   async getRoutainList(user: User): Promise<ResponseDto> {
     let routainList = await this.routainRepository.find({

@@ -75,7 +75,7 @@ export class AtomService {
 
   async deleteAtom(user: User, atomId: number): Promise<ResponseDto> {
     const atom = await this.atomRepository.findOne({
-      relations: ['registeredUser'],
+      relations: ['registeredUser', 'routainList'],
       where: { id: atomId },
     });
 
@@ -94,6 +94,15 @@ export class AtomService {
         'NOT_ATOM_OWNER',
         true,
         'NOT_ATOM_OWNER',
+      );
+    }
+
+    if (atom.routainList.length > 0) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'USING_ATOM',
+        true,
+        'USING_ATOM',
       );
     }
 
