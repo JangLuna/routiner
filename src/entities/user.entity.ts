@@ -15,11 +15,16 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   idx: number;
 
-  @Column()
-  name: string;
+  @Column({
+    unique: true,
+  })
+  id: string;
 
   @Column('text')
   passcode: string;
+
+  @Column()
+  name: string;
 
   @OneToMany((type) => Atom, (atom) => atom.registeredUser)
   atomList: Atom[];
