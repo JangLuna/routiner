@@ -17,13 +17,13 @@ export class AuthController {
 
   @Post('/signup')
   @UsePipes(ValidationPipe)
-  async signUp(@Body() createUserDto: CreateUserDto): Promise<ResponseDto> {
+  signUp(@Body() createUserDto: CreateUserDto) {
     return this.authService.createUser(createUserDto);
   }
 
   @Get('/signin')
   @UsePipes(ValidationPipe)
-  async signIn(@Body() signInDto: SignInDto): Promise<ResponseDto> {
+  signIn(@Body() signInDto: SignInDto) {
     return this.authService.login(signInDto);
   }
 }

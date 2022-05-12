@@ -70,7 +70,7 @@ export class AuthService {
     const user: User = await this.userRepository.findOne({ id });
 
     if (!user) {
-      throw new ResponseDto(
+      return new ResponseDto(
         HttpStatus.UNAUTHORIZED,
         'NOT_EXIST_USER',
         true,
@@ -78,7 +78,7 @@ export class AuthService {
       );
     } else {
       if (!(await bcrypt.compare(passcode, user.passcode))) {
-        throw new ResponseDto(
+        return new ResponseDto(
           HttpStatus.UNAUTHORIZED,
           'NOT_EXIST_USER',
           true,

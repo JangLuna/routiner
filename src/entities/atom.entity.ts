@@ -1,3 +1,4 @@
+import { AtomType } from 'src/atom/atom-type.enum';
 import {
   BaseEntity,
   Column,
@@ -17,9 +18,11 @@ export class Atom extends BaseEntity {
   text: string;
 
   @Column()
-  type: boolean;
+  type: AtomType;
 
-  @ManyToOne((type) => Routain, (routain) => routain.atomList)
+  @ManyToOne((type) => Routain, (routain) => routain.atomList, {
+    nullable: true,
+  })
   routain: Routain;
 
   @ManyToOne((type) => User, (user) => user.atomList)
