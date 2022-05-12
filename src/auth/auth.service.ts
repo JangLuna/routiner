@@ -3,15 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { ResponseDto } from 'src/dto/response.dto';
 import { User } from 'src/entities/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { getConnection, Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { SignInDto } from 'src/dto/sign-in.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private dataSource: DataSource,
+    private jwtService: JwtService,
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<ResponseDto> {
@@ -37,12 +39,12 @@ export class AuthService {
       name,
     });
 
-    const queryRunner = this.dataSource.createQueryRunner();
+    const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      user = await this.userRepository.save(user);
+      user = await queryRunner.manager.save(user);
 
       await queryRunner.commitTransaction();
       return new ResponseDto(200, 'SUCCESS', false, 'SUCCESS', user);
@@ -62,7 +64,40 @@ export class AuthService {
 
   async deleteUser() {}
 
-  async login() {}
+  async login(signInDto: SignInDto): Promise<ResponseDto> {
+    let { id, passcode } = signInDto;
 
-  async logout() {}
+    const user: User = await this.userRepository.findOne({ id });
+
+    if (!user) {
+      throw new ResponseDto(
+        HttpStatus.UNAUTHORIZED,
+        'NOT_EXIST_USER',
+        true,
+        'NOT_EXIST_USER',
+      );
+    } else {
+      if (!(await bcrypt.compare(passcode, user.passcode))) {
+        throw new ResponseDto(
+          HttpStatus.UNAUTHORIZED,
+          'NOT_EXIST_USER',
+          true,
+          'NOT_EXIST_USER',
+        );
+      } else {
+        let token = await this.jwtService.sign({
+          id,
+          name: user.name,
+        });
+
+        return new ResponseDto(
+          HttpStatus.ACCEPTED,
+          'SIGN_IN_SUCCESS',
+          false,
+          'SIGN_IN_SUCCESS',
+          { token: token },
+        );
+      }
+    }
+  }
 }
