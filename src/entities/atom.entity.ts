@@ -4,9 +4,11 @@ import {
   Column,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Routain } from './routain.entity';
+import { RoutainAtomPair } from './routain_atom_pair.entity';
 import { User } from './user.entity';
 
 @Entity()
@@ -20,10 +22,11 @@ export class Atom extends BaseEntity {
   @Column()
   type: AtomType;
 
-  @ManyToOne((type) => Routain, (routain) => routain.atomList, {
+  @OneToMany((type) => RoutainAtomPair, (pair) => pair.atom, {
     nullable: true,
+    cascade: true,
   })
-  routain: Routain;
+  routainList: Routain[];
 
   @ManyToOne((type) => User, (user) => user.atomList)
   registeredUser: User;

@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -6,9 +7,12 @@ import {
   Post,
   Render,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/decorators/get-user.decorator';
+import { CreateRoutainDto } from 'src/dto/create-routain.dto';
 import { User } from 'src/entities/user.entity';
 import { RoutainService } from './routain.service';
 
@@ -21,23 +25,34 @@ export class RoutainController {
   async routain() {}
 
   @Get('/get_routain_list')
-  getRoutainList() {}
+  @UseGuards(AuthGuard())
+  getRoutainList(@GetUser() user: User) {
+    return this.routainService.getRoutainList(user);
+  }
 
   @Post('/create_routain')
-  createRoutain() {}
+  @UseGuards(AuthGuard())
+  @UsePipes(ValidationPipe)
+  createRoutain(
+    @GetUser() user: User,
+    @Body() createRoutainDto: CreateRoutainDto,
+  ) {
+    return this.routainService.createRoutain(user, createRoutainDto);
+  }
 
   @Delete('/delete_routain')
-  deleteRoutain() {}
+  @UseGuards(AuthGuard())
+  deleteRoutain(@GetUser() user: User) {}
 
   @Get('/start_routain')
-  startRoutain() {}
+  @UseGuards(AuthGuard())
+  startRoutain(@GetUser() user: User) {}
 
   @Get('/stop_routain')
-  stopRoutain() {}
+  @UseGuards(AuthGuard())
+  stopRoutain(@GetUser() user: User) {}
 
   @Patch('/update_routain')
   @UseGuards(AuthGuard())
-  updateRoutain(@GetUser() user: User) {
-    return this.routainService.getRoutainList(user);
-  }
+  updateRoutain(@GetUser() user: User) {}
 }
