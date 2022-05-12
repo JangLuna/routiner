@@ -28,7 +28,10 @@ export class Routain extends BaseEntity {
   @Column({ nullable: true })
   atomOrderString: string;
 
-  @OneToMany((type) => RoutainLog, (log) => log.routain)
+  @OneToMany((type) => RoutainLog, (log) => log.routain, {
+    nullable: true,
+    cascade: true,
+  })
   logList: RoutainLog[];
 
   @Column()

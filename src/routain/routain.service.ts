@@ -66,9 +66,8 @@ export class RoutainService {
       name: name,
       isUse,
       atomOrderString: atomIdList.trim(),
+      registeredUser: user,
     });
-
-    console.log(routain);
 
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
@@ -108,7 +107,53 @@ export class RoutainService {
     }
   }
 
-  async deleteRoutain() {}
+  async deleteRoutain(user: User, routainId: number): Promise<ResponseDto> {
+    let routain: Routain = await this.routainRepository.findOne({
+      relations: ['registeredUser'],
+      where: { id: routainId },
+    });
+
+    if (!routain) {
+      return new ResponseDto(
+        HttpStatus.NOT_FOUND,
+        'UNREGISTERED_ROUTAIN',
+        true,
+        'UNREGISTERED_ROUTAIN',
+      );
+    }
+
+    if (routain.registeredUser.idx !== user.idx) {
+      return new ResponseDto(
+        HttpStatus.UNAUTHORIZED,
+        'NOT_ROUTAIN_OWNER',
+        true,
+        'NOT_ROUTAIN_OWNER',
+      );
+    }
+
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const result = await queryRunner.manager.delete(Routain, {
+        id: routain.id,
+      });
+      await queryRunner.commitTransaction();
+      return new ResponseDto(200, 'SUCCESS', false, 'SUCCESS', result);
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'INTERNAL_SERVER_ERROR',
+        true,
+        'INTERNAL_SERVER_ERROR',
+        e,
+      );
+    } finally {
+      await queryRunner.release();
+    }
+  }
 
   async startRoutain() {}
 

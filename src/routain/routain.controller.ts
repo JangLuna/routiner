@@ -42,7 +42,9 @@ export class RoutainController {
 
   @Delete('/delete_routain')
   @UseGuards(AuthGuard())
-  deleteRoutain(@GetUser() user: User) {}
+  deleteRoutain(@GetUser() user: User, @Body('id') routainId: number) {
+    return this.routainService.deleteRoutain(user, routainId);
+  }
 
   @Get('/start_routain')
   @UseGuards(AuthGuard())

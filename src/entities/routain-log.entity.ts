@@ -15,7 +15,9 @@ export class RoutainLog extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne((type) => Routain, (routain) => routain.logList)
+  @ManyToOne((type) => Routain, (routain) => routain.logList, {
+    onDelete: 'CASCADE',
+  })
   routain: Routain;
 
   @CreateDateColumn()
