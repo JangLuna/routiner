@@ -1,26 +1,7 @@
 const baseUrl = 'http://localhost:3000';
 let token = localStorage.getItem('HoopsToken');
 
-if (token != undefined && token.length > 0) {
-  // 토큰 검증
-  axios
-    .post(baseUrl + '/auth/verify_token', { token: token })
-    .then((response) => {
-      let tokenExpired = response.data.expired;
-
-      if (!tokenExpired) {
-        // 토큰이 만료되지 않았을 떄( 로그인 상태 )
-        $('#nav-button-box').hide();
-        mainInit();
-      } else {
-        // 만료되었을 때 (로그 아웃 상태 )
-        localStorage.removeItem('HoopsToken');
-        navBarInit();
-      }
-    });
-} else {
-  navBarInit();
-}
+preInit();
 
 function navBarInit() {
   $('#nav-button-box').show();
@@ -123,25 +104,58 @@ function mainInit() {
         let routain = res.data.data.routain;
 
         if (routain != undefined) {
+          $('.routain-card-spinner').remove();
+          $('.routain-button-box').addClass('d-flex');
           $('.is-use-routain').text(routain.name);
           $('.is-use-routain').attr('id', routain.id);
+
+          $('.routain-info').on('click', function () {
+            location.href = `/routain-detail?id=${routain.id}`;
+          });
         } else {
           // 루틴카드
+          $('.routain-card-spinner').remove();
           $('.is-use-routain').text('사용 중인 루틴이 없습니다.');
-          $('.routain-button-box').removeClass('d-flex').hide();
-
           //분석카드(Analyze)
-          $('.routain-analyze').empty().text('-');
+          // $('.routain-analyze').empty().text('-');
+          // $('.todo-analyze').empty().text('-');
         }
       }
     });
 
   // to-do Loading
-  $('.todo-date').text(new Date().toLocaleDateString());
-  $('.todo-message').show().text('등록된 To-do 리스트가 없습니다.');
-  $('.todo-analyze').empty().text('-');
+  $('.todo-card-spinner').remove();
+  $('.todo-message').text('등록된 To-do가 없습니다.');
 
   // todo http request
 
   // Analyze loading
+  $('.analyze-card-spinner').remove();
+  $('.analyze-content-wrapper').show();
+}
+
+function preInit() {
+  $('.todo-date').text(new Date().toLocaleDateString());
+  $('.routain-button-box').hide();
+
+  if (token != undefined && token.length > 0) {
+    // 토큰 검증
+    axios
+      .post(baseUrl + '/auth/verify_token', { token: token })
+      .then((response) => {
+        let tokenExpired = response.data.expired;
+
+        if (!tokenExpired) {
+          // 토큰이 만료되지 않았을 떄( 로그인 상태 )
+          $('#nav-button-box').hide();
+          mainInit();
+        } else {
+          // 만료되었을 때 (로그 아웃 상태 )
+          localStorage.removeItem('HoopsToken');
+          navBarInit();
+        }
+      });
+  } else {
+    navBarInit();
+  }
 }

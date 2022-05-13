@@ -1,0 +1,7 @@
+.body-text {
+  font-size: 14px;
+  margin: 0;
+}
+.navbar-toggler:focus {
+  box-shadow: none;
+}

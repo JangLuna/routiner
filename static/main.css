@@ -1,0 +1,26 @@
+.body-text {
+  font-size: 14px;
+  margin: 0;
+}
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+.nav-button {
+  cursor: pointer;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.94rem;
+  line-height: 1;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  transition: box-shadow 0.15s ease-in-out;
+  color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.routain-start,
+.routain-skip,
+.routain-info,
+.todo-create {
+  cursor: pointer;
+}

@@ -7,13 +7,18 @@ import { getConnection, Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { SignInDto } from 'src/dto/sign-in.dto';
 import { JwtService } from '@nestjs/jwt';
+import { Routain } from 'src/entities/routain.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private jwtService: JwtService,
+
+    @InjectRepository(Routain)
+    private routainRepository: Repository<Routain>,
+
+    private jwtService: JwtService
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<ResponseDto> {
@@ -26,7 +31,7 @@ export class AuthService {
         HttpStatus.CONFLICT,
         'ALREADY_EXIST_ID',
         true,
-        'ALREADY_EXIST_ID',
+        'ALREADY_EXIST_ID'
       );
     }
 
@@ -36,7 +41,7 @@ export class AuthService {
     let user: User = this.userRepository.create({
       id,
       passcode: hasedPassCode,
-      name,
+      name
     });
 
     const queryRunner = getConnection().createQueryRunner();
@@ -55,7 +60,7 @@ export class AuthService {
         'INTERNAL_SERVER_ERROR',
         true,
         'INTERNAL_SERVER_ERROR',
-        e,
+        e
       );
     } finally {
       await queryRunner.release();
@@ -74,7 +79,7 @@ export class AuthService {
         HttpStatus.UNAUTHORIZED,
         'NOT_EXIST_USER',
         true,
-        'NOT_EXIST_USER',
+        'NOT_EXIST_USER'
       );
     } else {
       if (!(await bcrypt.compare(passcode, user.passcode))) {
@@ -82,12 +87,12 @@ export class AuthService {
           HttpStatus.UNAUTHORIZED,
           'NOT_EXIST_USER',
           true,
-          'NOT_EXIST_USER',
+          'NOT_EXIST_USER'
         );
       } else {
         let token = await this.jwtService.sign({
           id,
-          name: user.name,
+          name: user.name
         });
 
         return new ResponseDto(
@@ -95,7 +100,7 @@ export class AuthService {
           'SIGN_IN_SUCCESS',
           false,
           'SIGN_IN_SUCCESS',
-          { token: token },
+          { token: token }
         );
       }
     }
@@ -106,8 +111,30 @@ export class AuthService {
     let expireDate = new Date(0);
     expireDate.setUTCSeconds(payload['exp']);
 
-    return {
-      expired: expireDate < new Date(),
+    let user: User = await this.userRepository.findOne({
+      where: {
+        id: payload['id'],
+        name: payload['name']
+      }
+    });
+
+    let routain: Routain = await this.routainRepository.findOne({
+      where: {
+        registeredUser: user,
+        isUse: true
+      }
+    });
+
+    let expired = expireDate < new Date();
+    let response = {
+      expired
     };
+
+    if (!expired && routain != undefined) {
+      delete routain.registeredUser;
+      response['routain'] = routain;
+    }
+
+    return response;
   }
 }

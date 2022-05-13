@@ -55,16 +55,20 @@
       <div class='card mb-3'>
         <div class='card-body'>
           <h5 class='card-title'>Use Routine</h5>
-          <p class='card-text is-use-routain'>-</p>
 
-          <div class='d-flex bd-highlight routain-button-box'>
+          <div class='spinner-border routain-card-spinner' role='status'>
+            <span class='visually-hidden'>Loading...</span>
+          </div>
+
+          <p class='card-text is-use-routain'></p>
+
+          <div class='bd-highlight routain-button-box' style='display: none;'>
             <i class='bi bi-play-fill p-2 bd-highlight routain-start'></i>
             <!-- <i class="bi bi-pause-fill p-2 bd-highlight routain-pause"></i> -->
             <!-- <i class="bi bi-stop-fill p-2 bd-highlight routain-stop"></i> -->
             <i class='bi bi-x me-auto p-2 bd-highlight routain-skip'></i>
 
-            <i class='bi bi-info-square p-2 bd-highlight'></i>
-            <i class='bi bi-pencil-square p-2 bd-highlight'></i>
+            <i class='bi bi-info-square p-2 bd-highlight routain-info'></i>
           </div>
         </div>
       </div>
@@ -72,11 +76,16 @@
         <div class='card-body'>
           <div class='d-flex bd-highlight'>
             <h5 class='card-title me-auto'>To-do</h5>
-            <i class='bi bi-plus' style='font-size: 24px'></i>
+            <i class='bi bi-plus todo-create' style='font-size: 24px'></i>
           </div>
 
-          <h6 class='card-subtitle text-muted mb-2 todo-date'>2022-05-11</h6>
-          <p class='card-text todo-message' style='display:none'></p>
+          <h6 class='card-subtitle text-muted mb-2 todo-date'></h6>
+
+          <div class='spinner-border todo-card-spinner' role='status'>
+            <span class='visually-hidden'>Loading...</span>
+          </div>
+
+          <p class='card-text todo-message'></p>
 
           <div class='todo-list mb-2'>
             <!-- <div class="todo-item card mb-2 p-2 body-text">Mock-up meeting</div>
@@ -105,19 +114,25 @@
         <div class='card-body'>
           <h5 class='card-title'>Analyze</h5>
 
-          <div class='mb-3'>
-            <h6 class='card-title text-muted mb-2'>Routain</h6>
-            <div class='routain-analyze'>
-              <p class='card-text body-text'>루틴 소요시간 평균 : - : - : -</p>
-              <p class='card-text body-text'>루틴 스킵 평균 (월) : - 회</p>
-            </div>
+          <div class='spinner-border analyze-card-spinner' role='status'>
+            <span class='visually-hidden'>Loading...</span>
           </div>
 
-          <div class='mb-3'>
-            <h6 class='card-title text-muted mb-2'>To-do</h6>
-            <div class='todo-analyze'>
-              <p class='card-text body-text'>평균 완료율(일) : -%</p>
-              <p class='card-text body-text'>평균 완료율(월) : -%</p>
+          <div class='analyze-content-wrapper' style='display: none;'>
+            <div class='mb-3'>
+              <h6 class='card-title text-muted mb-2'>Routain</h6>
+              <div class='routain-analyze'>
+                <p class='card-text body-text'>루틴 소요시간 평균 : - : - : -</p>
+                <p class='card-text body-text'>루틴 스킵 평균 (월) : - 회</p>
+              </div>
+            </div>
+
+            <div class='mb-3'>
+              <h6 class='card-title text-muted mb-2'>To-do</h6>
+              <div class='todo-analyze'>
+                <p class='card-text body-text'>평균 완료율(일) : -%</p>
+                <p class='card-text body-text'>평균 완료율(월) : -%</p>
+              </div>
             </div>
           </div>
         </div>
@@ -304,14 +319,7 @@
   />
 
   <!-- Custom style sheet -->
-  <style>
-    .body-text { font-size: 14px; margin: 0; } .navbar-toggler:focus {
-    box-shadow: none; } .nav-button { cursor: pointer; padding: 0.25rem 0.75rem;
-    font-size: 0.94rem; line-height: 1; background-color: transparent; border:
-    1px solid transparent; border-radius: 0.25rem; transition: box-shadow 0.15s
-    ease-in-out; color: rgba(255, 255, 255, 0.55); border-color: rgba(255, 255,
-    255, 0.1); }
-  </style>
+  <link rel='stylesheet' href='main.css' />
 
   <!-- JQuery -->
   <script
