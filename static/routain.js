@@ -229,7 +229,7 @@ function mainInit() {
 
   // 루틴 생성 팝업 save버튼
   $('#routainModal .routain-save').on('click', function () {
-    let routainName = $('.routain-name').val();
+    let routainName = $('.routain-make-name').val();
     let jAtomCheckList = $(
       'input:checkbox[name="routain-atom-list-item-checkbox"]'
     );
@@ -258,6 +258,7 @@ function mainInit() {
         alert('오류가 발생했습니다.\n관리자에게 문의하세요');
       }
       $('#routainModal .btn-close').trigger('click');
+      location.reload();
     });
   });
 

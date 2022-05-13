@@ -127,8 +127,7 @@ export class AuthService {
 
     let expired = expireDate < new Date();
     let response = {
-      expired,
-      name: user.name
+      expired
     };
 
     if (!expired && routain != undefined) {

@@ -61,9 +61,11 @@ export class RoutainService {
         existAtomList = await this.atomRepository
           .createQueryBuilder()
           .whereInIds(parsedAtomIdList)
-          .where({ registeredUser: user })
+          .andWhere({ registeredUser: user })
           .getMany();
       }
+
+      console.log(parsedAtomIdList, existAtomList);
 
       // 그렇게 두 리스트가 길이가 같지 않을 떄 오류
       if (parsedAtomIdList.length != existAtomList.length) {
