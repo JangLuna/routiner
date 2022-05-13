@@ -19,12 +19,8 @@ if (token != undefined && token.length > 0) {
       }
     });
 } else {
-  $('.want-atom-list').empty();
-  $('.must-atom-list').empty();
-
-  navBarInit();
-
   alert('로그인을 진행하여 주십시오.');
+  location.href = '/';
 }
 
 function mainInit() {
@@ -36,8 +32,8 @@ function mainInit() {
     url: baseUrl + '/atom/get_atom_list',
     method: 'get',
     headers: {
-      Authorization: `Bearer ${token}`,
-    },
+      Authorization: `Bearer ${token}`
+    }
   }).then((res) => {
     // 데이터 객체로부터 가져오기
     let totalAtomList = res.data.data.totalAtomList;
@@ -50,7 +46,7 @@ function mainInit() {
         '<li class="list-group-item">\n' +
           '<span>Item 1</span>\n' +
           '<i class="bi bi-trash" style="font-size: 16px; float: right"></i>\n' +
-          '</li>',
+          '</li>'
       );
 
       // attribute mapping
@@ -61,7 +57,7 @@ function mainInit() {
       jAtom.find('i').on('click', function () {
         // 물어보기
         let result = confirm(
-          '삭제할 시 복구할 수 없습니다.\n삭제하시겠습니까?',
+          '삭제할 시 복구할 수 없습니다.\n삭제하시겠습니까?'
         );
 
         if (result) {
@@ -69,11 +65,11 @@ function mainInit() {
             url: baseUrl + '/atom/delete_atom',
             method: 'delete',
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${token}`
             },
             data: {
-              id: $(this).parent().attr('id'),
-            },
+              id: $(this).parent().attr('id')
+            }
           })
             .then((res) => {
               if (res.data.code === 'SUCCESS') {
@@ -108,12 +104,12 @@ function mainInit() {
       url: baseUrl + '/atoms/create_atom',
       method: 'post',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`
       },
       data: {
         text,
-        type: 'MUST',
-      },
+        type: 'MUST'
+      }
     };
 
     axios(axiosConfig).then((res) => {
@@ -127,7 +123,7 @@ function mainInit() {
         '<li class="list-group-item">\n' +
           '<span>Item 1</span>\n' +
           '<i class="bi bi-trash" style="font-size: 16px; float: right"></i>\n' +
-          '</li>',
+          '</li>'
       );
 
       jAtom.attr('id', atomId);
@@ -144,12 +140,12 @@ function mainInit() {
       url: baseUrl + '/atom/create_atom',
       method: 'post',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`
       },
       data: {
         text,
-        type: 'WANT',
-      },
+        type: 'WANT'
+      }
     };
 
     axios(axiosConfig).then((res) => {
@@ -163,7 +159,7 @@ function mainInit() {
         '<li class="list-group-item">\n' +
           '<span>Item 1</span>\n' +
           '<i class="bi bi-trash" style="font-size: 16px; float: right"></i>\n' +
-          '</li>',
+          '</li>'
       );
 
       jAtom.attr('id', atomId);
@@ -190,7 +186,7 @@ function navBarInit() {
     axios
       .post(baseUrl + '/auth/signin', {
         id: userId,
-        passcode: passcode,
+        passcode: passcode
       })
       .then(function (response) {
         let data = response.data;
@@ -244,7 +240,7 @@ function navBarInit() {
       .post(baseUrl + '/auth/signup', {
         id: userId,
         passcode: passcode,
-        name: userName,
+        name: userName
       })
       .then(function (response) {
         let data = response.data;

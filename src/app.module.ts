@@ -11,6 +11,7 @@ import { RoutainModule } from './routain/routain.module';
 import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigurationModule } from './configuration/configuration.module';
+import { RoutainDetailModule } from './routain-detail/routain-detail.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ConfigurationModule } from './configuration/configuration.module';
     TypeOrmModule.forFeature([Routain, RoutainLog, Todo, Atom]),
     AuthModule,
     ConfigurationModule,
+    RoutainDetailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

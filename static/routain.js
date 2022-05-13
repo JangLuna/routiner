@@ -19,11 +19,8 @@ if (token != undefined && token.length > 0) {
       }
     });
 } else {
-  $('.routain-list').empty();
-
-  navBarInit();
-
   alert('로그인을 진행하여 주십시오.');
+  location.href = '/';
 }
 
 function mainInit() {
@@ -57,8 +54,16 @@ function mainInit() {
         jRoutain.find('span').text(routain.name);
         jRoutain.attr('id', routain.id);
 
+        jRoutain.on('click', function (e) {
+          e.stopPropagation();
+          e.preventDefault();
+          location.href = `/routain-detail?id=${routain.id}`;
+        });
+
         // add click event to delete btn and modify btn
-        jRoutain.find('.routain-delete').on('click', function () {
+        jRoutain.find('.routain-delete').on('click', function (e) {
+          e.stopPropagation();
+          e.stopPropagation();
           let id = $(this).parent().attr('id');
           let jThis = $(this);
 
@@ -90,6 +95,8 @@ function mainInit() {
         jRoutain
           .find('.routain-modify')
           .on('click', { id: routain.id, name: routain.name }, function (e) {
+            e.stopPropagation();
+            e.stopPropagation();
             $('.routain-modify-name').val(e.data.name);
             $('.routain-modify-save').attr('id', e.data.id);
 

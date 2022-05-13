@@ -36,7 +36,7 @@ function navBarInit() {
     axios
       .post(baseUrl + '/auth/signin', {
         id: userId,
-        passcode: passcode,
+        passcode: passcode
       })
       .then(function (response) {
         let data = response.data;
@@ -90,7 +90,7 @@ function navBarInit() {
       .post(baseUrl + '/auth/signup', {
         id: userId,
         passcode: passcode,
-        name: userName,
+        name: userName
       })
       .then(function (response) {
         let data = response.data;
@@ -115,23 +115,32 @@ function mainInit() {
   axios
     .get(baseUrl + '/routain/get_use_routain', {
       headers: {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     })
     .then((res) => {
-      let routain = res.data.data.routain;
+      if (res.data.code === 'SUCCESS') {
+        let routain = res.data.data.routain;
 
-      console.log(routain);
+        if (routain != undefined) {
+          $('.is-use-routain').text(routain.name);
+          $('.is-use-routain').attr('id', routain.id);
+        } else {
+          // 루틴카드
+          $('.is-use-routain').text('사용 중인 루틴이 없습니다.');
+          $('.routain-button-box').removeClass('d-flex').hide();
 
-      if (!routain != undefined) {
-        $('.is-use-routain').text(routain.name);
-        $('.is-use-routain').attr('id', routain.id);
+          //분석카드(Analyze)
+          $('.routain-analyze').empty().text('-');
+        }
       }
     });
 
   // to-do Loading
-
   $('.todo-date').text(new Date().toLocaleDateString());
+  $('.todo-message').show().text('등록된 To-do 리스트가 없습니다.');
+  $('.todo-analyze').empty().text('-');
+
   // todo http request
 
   // Analyze loading
