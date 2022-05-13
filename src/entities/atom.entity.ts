@@ -2,6 +2,7 @@ import { AtomType } from 'src/atom/atom-type.enum';
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -30,4 +31,7 @@ export class Atom extends BaseEntity {
 
   @ManyToOne((type) => User, (user) => user.atomList)
   registeredUser: User;
+
+  @CreateDateColumn()
+  createdDate: Date;
 }

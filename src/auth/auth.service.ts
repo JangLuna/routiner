@@ -100,4 +100,14 @@ export class AuthService {
       }
     }
   }
+
+  async verifyToken(token: string) {
+    let payload = await this.jwtService.verify(token);
+    let expireDate = new Date(0);
+    expireDate.setUTCSeconds(payload['exp']);
+
+    return {
+      expired: expireDate < new Date(),
+    };
+  }
 }
