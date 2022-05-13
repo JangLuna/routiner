@@ -133,10 +133,29 @@ export class AtomService {
   async getAtomList(user: User): Promise<ResponseDto> {
     const atomList = await this.atomRepository.find({
       where: { registeredUser: user },
+      order: { createdDate: 'ASC' },
     });
 
+    // let mustAtomList: Atom[] = [];
+    // let wantAtomList: Atom[] = [];
+
+    // if (atomList.length > 0) {
+    //   for (let i in atomList) {
+    //     let atom: Atom = atomList[i];
+    //     delete atom.registeredUser;
+
+    //     if (atom.type == AtomType.MUST) {
+    //       mustAtomList.push(atom);
+    //     } else {
+    //       wantAtomList.push(atom);
+    //     }
+    //   }
+    // }
+
     return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS', {
-      atomList,
+      totalAtomList: atomList,
+      // mustAtomList,
+      // wantAtomList,
     });
   }
 }

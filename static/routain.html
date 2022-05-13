@@ -10,9 +10,27 @@
       class="navbar navbar-expand-lg bg-dark navbar-dark border-bottom mb-3 sticky-top"
     >
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Hoops</a>
+        <a class="navbar-brand me-auto" href="#">Hoops</a>
+
+        <div id="nav-button-box" class="bd-highlight me-3">
+          <i
+            class="bi bi-key-fill nav-button"
+            id="btn-login"
+            data-bs-toggle="modal"
+            data-bs-target="#loginModal"
+            alt="로그인"
+          ></i>
+          <i
+            class="bi bi-door-open-fill nav-button"
+            id="btn-signup"
+            data-bs-toggle="modal"
+            data-bs-target="#signupModal"
+            alt="회원가입"
+          ></i>
+        </div>
+
         <button
-          class="navbar-toggler"
+          class="navbar-toggler bd-highlight"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNavAltMarkup"
@@ -22,13 +40,12 @@
         >
           <i class="bi bi-list"></i>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav">
-            <a class="nav-link" href="/main.html">Home</a>
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
             <a class="nav-link" href="#">Atoms</a>
-            <a class="nav-link active" aria-current="page" href="/routain.html"
-              >Routine</a
-            >
+            <a class="nav-link" href="#">Routine</a>
             <a class="nav-link">To-do</a>
           </div>
         </div>
@@ -126,6 +143,140 @@
               </button>
               <button type="button" class="btn btn-primary">저장</button>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div
+      class="modal fade"
+      id="loginModal"
+      tabindex="-1"
+      aria-labelledby="loginModal"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginModal">Login</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="login-user-id" class="form-label">ID</label>
+              <input
+                id="login-user-id"
+                type="text"
+                class="form-control"
+                placeholder="ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="login-user-passcode" class="form-label"
+                >Passcode</label
+              >
+              <input
+                id="login-user-passcode"
+                type="password"
+                class="form-control"
+                placeholder="●●●●●●●●●"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              취소
+            </button>
+            <button id="btn-login" type="button" class="btn btn-primary">
+              로그인
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sign-up Modal -->
+    <div
+      class="modal fade"
+      id="signupModal"
+      tabindex="-1"
+      aria-labelledby="signupModal"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="signupModal">Sign-up</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="signup-user-id" class="form-label">ID</label>
+              <input
+                id="signup-user-id"
+                type="text"
+                class="form-control"
+                placeholder="ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="signup-user-name" class="form-label">Name</label>
+              <input
+                id="signup-user-name"
+                type="text"
+                class="form-control"
+                placeholder="Hong Gil Dong"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="signup-user-passcode" class="form-label"
+                >Passcode</label
+              >
+              <input
+                id="signup-user-passcode"
+                type="password"
+                class="form-control"
+                placeholder="●●●●●●●●●"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="signup-user-passcode-confirm" class="form-label"
+                >Passcode Confirm</label
+              >
+              <input
+                id="signup-user-passcode-confirm"
+                type="password"
+                class="form-control"
+                placeholder="●●●●●●●●●"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              취소
+            </button>
+            <button id="btn-signup" type="button" class="btn btn-primary">
+              회원가입
+            </button>
           </div>
         </div>
       </div>

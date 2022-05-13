@@ -25,6 +25,12 @@ export class RoutainController {
   @Render('routain')
   async routain() {}
 
+  @Get('/get_use_routain')
+  @UseGuards(AuthGuard())
+  getInUseRouatin(@GetUser() user: User) {
+    return this.routainService.getIsUseRoutain(user);
+  }
+
   @Get('/get_routain_list')
   @UseGuards(AuthGuard())
   getRoutainList(@GetUser() user: User) {

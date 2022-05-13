@@ -246,6 +246,33 @@ export class RoutainService {
     }
   }
 
+  async getIsUseRoutain(user: User): Promise<ResponseDto> {
+    try {
+      let inUseRoutain = await this.routainRepository.findOne({
+        where: {
+          registeredUser: user,
+          isUse: true,
+        },
+      });
+
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'SUCCESS',
+        false,
+        'SUCCESS',
+        { routain: inUseRoutain },
+      );
+    } catch (e) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'INTERNAL_SERVER_ERROR',
+        true,
+        'INTERNAL_SERVER_ERROR',
+        e,
+      );
+    }
+  }
+
   async getRoutainList(user: User): Promise<ResponseDto> {
     let routainList = await this.routainRepository.find({
       where: { registeredUser: user },
