@@ -59,90 +59,129 @@
           <div class="d-flex bd-highlight mb-2">
             <h5 class="card-title me-auto">Routains</h5>
             <i
-              class="bi bi-plus"
+              class="bi bi-plus routain-create-modal-show"
               data-bs-toggle="modal"
-              data-bs-target="#atomModal"
+              data-bs-target="#routainModal"
               style="font-size: 24px"
             ></i>
           </div>
 
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-              <span>Normal Routain</span>
-              <i class="bi bi-trash" style="font-size: 16px; float: right"></i>
-              <i
-                class="bi bi-pencil"
-                style="font-size: 16px; float: right; margin-right: 15px"
-              ></i>
-            </li>
-            <li class="list-group-item">
-              <span>Weekend Routain</span>
-              <i class="bi bi-trash" style="font-size: 16px; float: right"></i>
-              <i
-                class="bi bi-pencil"
-                style="font-size: 16px; float: right; margin-right: 15px"
-              ></i>
-            </li>
-          </ul>
+          <ul class="list-group list-group-flush routain-list"></ul>
         </div>
       </div>
+    </div>
 
-      <!-- Modal -->
-      <div
-        class="modal fade"
-        id="atomModal"
-        tabindex="-1"
-        aria-labelledby="atomModalLabel"
-        aria-hidden="true"
-      >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="atomModalLabel">Make Routain</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
+    <!-- Make Routain Modal -->
+    <div
+      class="modal fade"
+      id="routainModal"
+      tabindex="-1"
+      aria-labelledby="routainModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="routainModalLabel">Make Routain</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="routain-make-name" class="form-label"
+                >Routain Name</label
+              >
+              <input
+                id="routain-make-name"
+                type="text"
+                class="form-control routain-make-name"
+                placeholder="Routain name here"
+              />
             </div>
-            <div class="modal-body">
-              <div class="mb-3">
-                <label for="routain-name" class="form-label"
-                  >Routain Name</label
-                >
-                <input
-                  id="routain-name"
-                  type="text"
-                  class="form-control"
-                  placeholder="Routain name here"
-                />
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Select Atoms</label>
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    value=""
-                    id="flexCheckDefault"
-                  />
-                  <label class="form-check-label" for="flexCheckDefault">
-                    Morning coffee
-                  </label>
+            <div class="mb-3">
+              <label class="form-label">Select Atoms</label>
+              <div class="card routain-no-atoms" style="display: none">
+                <div class="card-body">
+                  <p class="card-text">아톰이 존재하지 않습니다.</p>
                 </div>
               </div>
+              <div class="routain-atom-list"></div>
             </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              취소
+            </button>
+            <button type="button" class="btn btn-primary routain-save">
+              저장
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modify ROutain Modal -->
+    <div
+      class="modal fade"
+      id="routainModifyModal"
+      tabindex="-1"
+      aria-labelledby="routainModifyModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="routainModifyModalLabel">
+              Modify Routain
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="routain-modify-name" class="form-label"
+                >Routain Name</label
               >
-                취소
-              </button>
-              <button type="button" class="btn btn-primary">저장</button>
+              <input
+                id="routain-modify-name"
+                type="text"
+                class="form-control routain-modify-name"
+                placeholder="Routain name here"
+              />
             </div>
+            <div class="mb-3">
+              <label class="form-label">Select Atoms</label>
+              <div class="card routain-modify-no-atoms" style="display: none">
+                <div class="card-body">
+                  <p class="card-text">아톰이 존재하지 않습니다.</p>
+                </div>
+              </div>
+              <div class="routain-modify-atom-list"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              취소
+            </button>
+            <button type="button" class="btn btn-primary routain-modify-save">
+              저장
+            </button>
           </div>
         </div>
       </div>
@@ -306,10 +345,35 @@
     .navbar-toggler:focus {
       box-shadow: none;
     }
+
+    .body-text {
+      font-size: 14px;
+      margin: 0;
+    }
+    .navbar-toggler:focus {
+      box-shadow: none;
+    }
+
+    .nav-button {
+      cursor: pointer;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.94rem;
+      line-height: 1;
+      background-color: transparent;
+      border: 1px solid transparent;
+      border-radius: 0.25rem;
+      transition: box-shadow 0.15s ease-in-out;
+      color: rgba(255, 255, 255, 0.55);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
   </style>
 
-  <!-- 페이지 javascript -->
-  <script src="main.js"></script>
+  <!-- JQuery -->
+  <script
+    src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+    crossorigin="anonymous"
+  ></script>
 
   <!-- 부트스트랩js -->
   <script
@@ -317,4 +381,9 @@
     integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
     crossorigin="anonymous"
   ></script>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <!-- 페이지 javascript -->
+  <script src="routain.js"></script>
 </html>

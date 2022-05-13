@@ -8,7 +8,7 @@ import {
   Render,
   UseGuards,
   UsePipes,
-  ValidationPipe,
+  ValidationPipe
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/decorators/get-user.decorator';
@@ -31,6 +31,12 @@ export class RoutainController {
     return this.routainService.getIsUseRoutain(user);
   }
 
+  @Post('/get_routain')
+  @UseGuards(AuthGuard())
+  getRoutain(@GetUser() user: User, @Body('id') routainId: number) {
+    return this.routainService.getRoutain(user, routainId);
+  }
+
   @Get('/get_routain_list')
   @UseGuards(AuthGuard())
   getRoutainList(@GetUser() user: User) {
@@ -42,7 +48,7 @@ export class RoutainController {
   @UsePipes(ValidationPipe)
   createRoutain(
     @GetUser() user: User,
-    @Body() createRoutainDto: CreateRoutainDto,
+    @Body() createRoutainDto: CreateRoutainDto
   ) {
     return this.routainService.createRoutain(user, createRoutainDto);
   }
@@ -66,7 +72,7 @@ export class RoutainController {
   @UsePipes(ValidationPipe)
   updateRoutain(
     @GetUser() user: User,
-    @Body() updateRoutainDto: UpdateRoutainDto,
+    @Body() updateRoutainDto: UpdateRoutainDto
   ) {
     return this.routainService.editRoutain(user, updateRoutainDto);
   }
