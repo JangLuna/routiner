@@ -104,7 +104,7 @@ function mainInit() {
     let text = $('.must-atom-text').val();
 
     let axiosConfig = {
-      url: baseUrl + '/atoms/create_atom',
+      url: baseUrl + '/atom/create_atom',
       method: 'post',
       headers: {
         Authorization: `Bearer ${token}`
