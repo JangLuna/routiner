@@ -7,7 +7,8 @@ if (token != undefined && token.length > 0) {
     .post(baseUrl + '/auth/verify_token', { token: token })
     .then((response) => {
       let tokenExpired = response.data.expired;
-      let name = response.data.name;
+      let name =
+        response.data.name != undefined ? response.data.name + " 's" : '';
 
       if (!tokenExpired) {
         // 토큰이 만료되지 않았을 떄( 로그인 상태 )

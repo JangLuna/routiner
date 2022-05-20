@@ -144,12 +144,13 @@ function preInit() {
       .post(baseUrl + '/auth/verify_token', { token: token })
       .then((response) => {
         let tokenExpired = response.data.expired;
-        let name = response.data.name;
+        let name =
+          response.data.name != undefined ? response.data.name + " 's" : '';
 
         if (!tokenExpired) {
           // 토큰이 만료되지 않았을 떄( 로그인 상태 )
           $('#nav-button-box').hide();
-          $('.hoops-title').text(`${name} 's Hoops`);
+          $('.hoops-title').text(`${name} Hoops`);
           mainInit();
         } else {
           // 만료되었을 때 (로그 아웃 상태 )
