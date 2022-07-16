@@ -118,6 +118,81 @@ function mainInit() {
           // $('.routain-analyze').empty().text('-');
           // $('.todo-analyze').empty().text('-');
         }
+
+        // 사용 루틴 선택 모달 관련 로직
+        const selectUseRoutainBtn = $('#select-use-routain-modal-btn');
+        selectUseRoutainBtn.on('click', function () {
+          axios
+            .get(baseUrl + '/routain/get_routain_list', {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            })
+            .then((res) => {
+              const routainList = res.data.data.routainList;
+
+              if (routainList.length == 0) {
+                $('.select-use-routain-no-routain').show();
+                return;
+              }
+
+              // routain list initialization
+              const jRoutainList = $(
+                '#selectUseRoutainModal .routain-list'
+              ).empty();
+
+              const isUseRoutainId = $('.is-use-routain').attr('routain-id');
+
+              // print routain items
+              for (let i in routainList) {
+                const routain = routainList[i];
+                let jRoutain = $(
+                  '<div class="form-check use-routain-list-item">' +
+                    `<input class="form-check-input routain-atom-list-item-checkbox" name="routain-atom-list-item-checkbox" type="radio" value=${routain.id} id="flexCheckDefault"/>` +
+                    `<label class="form-check-label" for="flexCheckDefault">${routain.name}</label>` +
+                    '</div>'
+                );
+
+                if (routain.id == isUseRoutainId) {
+                  jRoutain.find('input').attr('disabled', true);
+                }
+
+                jRoutainList.append(jRoutain);
+              }
+
+              // 저장버튼
+              $('.use-rouatin-save').on('click', () => {
+                const list = $('input[name="routain-atom-list-item-checkbox"]');
+                let routainId = undefined;
+                list.each(function () {
+                  if (this.checked) {
+                    routainId = this.value;
+                  }
+                });
+
+                if (!routainId) {
+                  alert('루틴을 선택하여 주십시오.');
+                  return;
+                }
+
+                axios({
+                  url: baseUrl + '/routain/set_use_routain',
+                  method: 'patch',
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  },
+                  data: {
+                    id: routainId
+                  }
+                }).then((res) => {
+                  if (res.data.code === 'SUCCESS') {
+                    alert('루틴이 성공적으로 사용 설정 되었습니다.');
+                    location.reload();
+                  }
+                });
+              });
+            });
+        });
       }
     });
 

@@ -31,8 +31,14 @@ export class RoutainController {
 
   @Get('/get_use_routain')
   @UseGuards(AuthGuard())
-  getInUseRouatin(@GetUser() user: User) {
+  getUseRouatin(@GetUser() user: User) {
     return this.routainService.getIsUseRoutain(user);
+  }
+
+  @Patch('/set_use_routain')
+  @UseGuards(AuthGuard())
+  setIsUseRoutain(@GetUser() user: User, @Body('id') routainId: number) {
+    return this.routainService.setIsUseRoutain(user, routainId);
   }
 
   @Post('/get_routain')
