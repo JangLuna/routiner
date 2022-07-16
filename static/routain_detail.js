@@ -15,11 +15,14 @@ if (token != undefined && token.length > 0) {
         $('#nav-button-box').hide();
         $('.hoops-title').text(`${name}  Hoops`);
         mainInit();
-      } else {
-        // 만료되었을 때 (로그 아웃 상태 )
-        localStorage.removeItem('HoopsToken');
-        navBarInit();
       }
+    })
+    .catch((err) => {
+      alert('로그인 정보가 만료되었습니다. 다시 로그인하여 주시기 바랍니다.');
+      localStorage.removeItem('HoopsToken');
+
+      // 로그인 팝업 띄움
+      $('#btn-login').click();
     });
 } else {
   alert('로그인을 진행하여 주십시오.');
