@@ -107,26 +107,33 @@ export class AuthService {
   }
 
   async verifyToken(token: string) {
-    let payload = await this.jwtService.verify(token);
-    let expireDate = new Date(0);
+    let payload = undefined;
+
+    try {
+      payload = await this.jwtService.verify(token);
+    } catch (err) {
+      throw new UnauthorizedException();
+    }
+
+    const expireDate = new Date(0);
     expireDate.setUTCSeconds(payload['exp']);
 
-    let user: User = await this.userRepository.findOne({
+    const user: User = await this.userRepository.findOne({
       where: {
         id: payload['id'],
         name: payload['name']
       }
     });
 
-    let routain: Routain = await this.routainRepository.findOne({
+    const routain: Routain = await this.routainRepository.findOne({
       where: {
         registeredUser: user,
         isUse: true
       }
     });
 
-    let expired = expireDate < new Date();
-    let response = {
+    const expired = expireDate < new Date();
+    const response = {
       expired
     };
 

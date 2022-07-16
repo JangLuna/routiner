@@ -101,7 +101,7 @@ function mainInit() {
     })
     .then((res) => {
       if (res.data.code === 'SUCCESS') {
-        let routain = res.data.data.routain;
+        const routain = res.data.data.routain;
 
         if (routain != undefined) {
           $('.routain-card-spinner').remove();
@@ -137,6 +137,7 @@ function mainInit() {
 function preInit() {
   $('.todo-date').text(new Date().toLocaleDateString());
   $('.routain-button-box').hide();
+  navBarInit();
 
   if (token != undefined && token.length > 0) {
     // 토큰 검증
@@ -152,13 +153,14 @@ function preInit() {
           $('#nav-button-box').hide();
           $('.hoops-title').text(`${name} Hoops`);
           mainInit();
-        } else {
-          // 만료되었을 때 (로그 아웃 상태 )
-          localStorage.removeItem('HoopsToken');
-          navBarInit();
         }
+      })
+      .catch((err) => {
+        alert('로그인 정보가 만료되었습니다. 다시 로그인하여 주시기 바랍니다.');
+        localStorage.removeItem('HoopsToken');
+
+        // 로그인 팝업 띄움
+        $('#btn-login').click();
       });
-  } else {
-    navBarInit();
   }
 }
