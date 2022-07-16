@@ -104,10 +104,9 @@ function mainInit() {
         const routain = res.data.data.routain;
 
         if (routain != undefined) {
-          $('.routain-card-spinner').remove();
           $('.routain-button-box').addClass('d-flex');
           $('.is-use-routain').text(routain.name);
-          $('.is-use-routain').attr('id', routain.id);
+          $('.is-use-routain').attr('routain-id', routain.id);
 
           $('.routain-info').on('click', function () {
             location.href = `/routain-detail?id=${routain.id}`;
