@@ -282,21 +282,14 @@ export class RoutainService {
   }
 
   async getIsUseRoutain(user: User): Promise<ResponseDto> {
+    let inUseRoutain: Routain = undefined;
     try {
-      let inUseRoutain = await this.routainRepository.findOne({
+      inUseRoutain = await this.routainRepository.findOne({
         where: {
           registeredUser: user,
           isUse: true
         }
       });
-
-      return new ResponseDto(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'SUCCESS',
-        false,
-        'SUCCESS',
-        { routain: inUseRoutain }
-      );
     } catch (e) {
       return new ResponseDto(
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -306,6 +299,90 @@ export class RoutainService {
         e
       );
     }
+
+    if (inUseRoutain != undefined) {
+      return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS', {
+        routain: inUseRoutain
+      });
+    }
+  }
+
+  async setIsUseRoutain(user: User, routainId: number): Promise<ResponseDto> {
+    let routainList: Routain[] = undefined;
+
+    try {
+      routainList = await this.routainRepository.find({
+        where: {
+          registeredUser: user
+        }
+      });
+    } catch (e) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'INTERNAL_SERVER_ERROR',
+        true,
+        'INTERNAL_SERVER_ERROR',
+        e
+      );
+    }
+
+    if (routainList == undefined) {
+      return new ResponseDto(
+        HttpStatus.NOT_FOUND,
+        'Routain is not found',
+        true,
+        'Routain is not found'
+      );
+    }
+
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      let prevIsUseRoutainList: Routain[] = routainList.filter(
+        (v) => v.isUse == true
+      );
+      let newIsUseRoutainList: Routain[] = routainList.filter(
+        (v) => v.id == routainId
+      );
+
+      if (prevIsUseRoutainList.length != 0) {
+        await queryRunner.manager.query(`
+          UPDATE routain
+          SET isUse = 0
+          WHERE id = ${prevIsUseRoutainList.pop().id}
+        `);
+      }
+
+      await queryRunner.manager.query(`
+          UPDATE routain
+          SET isUse = 1
+          WHERE id = ${newIsUseRoutainList.pop().id}
+      `);
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'INTERNAL_SERVER_ERROR',
+        true,
+        'INTERNAL_SERVER_ERROR',
+        e
+      );
+    } finally {
+      await queryRunner.release();
+    }
+
+    return new ResponseDto(
+      HttpStatus.ACCEPTED,
+      'SUCCESS',
+      false,
+      'SUCCESS',
+      {}
+    );
   }
 
   async getRoutainList(user: User): Promise<ResponseDto> {
