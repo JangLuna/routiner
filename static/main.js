@@ -114,7 +114,6 @@ function mainInit() {
           });
         } else {
           // 루틴카드
-          $('.routain-card-spinner').remove();
           $('.is-use-routain').text('사용 중인 루틴이 없습니다.');
           //분석카드(Analyze)
           // $('.routain-analyze').empty().text('-');
@@ -124,13 +123,11 @@ function mainInit() {
     });
 
   // to-do Loading
-  $('.todo-card-spinner').remove();
   $('.todo-message').text('등록된 To-do가 없습니다.');
 
   // todo http request
 
   // Analyze loading
-  $('.analyze-card-spinner').remove();
   $('.analyze-content-wrapper').show();
 }
 
