@@ -40,3 +40,6 @@ lerna-debug.log*
 .env.dev
 .env.prod
 .env.test
+
+# key files
+*.pem
