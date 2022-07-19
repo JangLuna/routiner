@@ -8,7 +8,12 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'static'));
   app.setBaseViewsDir(join(__dirname, '..', 'static'));
   app.setViewEngine('hbs');
-  app.enableCors({ origin: '*', methods: ['GET', 'POST', 'PATCH', 'DELETE'] });
+
+  app.enableCors({
+    origin: ['https:routainer.janglunalab.com', '/.github.io$/'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE'
+  });
+
   await app.listen(3000);
 }
 bootstrap();
