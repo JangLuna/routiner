@@ -6,7 +6,7 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn
 } from 'typeorm';
 import { Routain } from './routain.entity';
 import { RoutainAtomPair } from './routain_atom_pair.entity';
@@ -23,9 +23,12 @@ export class Atom extends BaseEntity {
   @Column()
   type: AtomType;
 
+  @Column()
+  duration: number;
+
   @OneToMany((type) => RoutainAtomPair, (pair) => pair.atom, {
     nullable: true,
-    cascade: true,
+    cascade: true
   })
   routainList: Routain[];
 

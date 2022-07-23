@@ -283,6 +283,7 @@ export class RoutainService {
 
   async getIsUseRoutain(user: User): Promise<ResponseDto> {
     let inUseRoutain: Routain = undefined;
+    let atomList: Atom[] = [];
     try {
       inUseRoutain = await this.routainRepository.findOne({
         where: {
@@ -290,6 +291,11 @@ export class RoutainService {
           isUse: true
         }
       });
+
+      atomList = await this.atomRepository.findByIds(
+        inUseRoutain.atomOrderString.split(',')
+      );
+      console.log(atomList);
     } catch (e) {
       return new ResponseDto(
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -302,7 +308,8 @@ export class RoutainService {
 
     if (inUseRoutain != undefined) {
       return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS', {
-        routain: inUseRoutain
+        routain: inUseRoutain,
+        routain_atom_list: atomList
       });
     }
   }
