@@ -10,10 +10,12 @@ async function bootstrap() {
   app.setViewEngine('hbs');
 
   app.enableCors({
-    origin: ['https:routainer.janglunalab.com', '/.github.io$/'],
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE'
   });
 
-  await app.listen(3000);
+  const port = 8080;
+  await app.listen(port);
+  console.log(`App is running on ${port}`);
 }
 bootstrap();
