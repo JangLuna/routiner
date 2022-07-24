@@ -19,4 +19,7 @@ export class PhoneVerification extends BaseEntity {
 
   @Column()
   expired_date: Date;
+
+  @Column()
+  is_expired: number;
 }

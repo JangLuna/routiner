@@ -22,7 +22,7 @@ export class AuthService {
     private routainRepository: Repository<Routain>,
 
     @InjectRepository(PhoneVerification)
-    private emailVerificationRepository: Repository<PhoneVerification>,
+    private phoneVerificationRepository: Repository<PhoneVerification>,
 
     private jwtService: JwtService
   ) {}
@@ -33,37 +33,60 @@ export class AuthService {
     await queryRunner.startTransaction();
 
     try {
-      const verificationCodeCount =
-        await this.emailVerificationRepository.count({
-          where: { phone: phone }
-        });
+      const verificationCodeList = await this.phoneVerificationRepository.find({
+        where: { phone: phone }
+      });
 
-      // 이전에 요청했던 이력이 있다면
-      if (verificationCodeCount > 4) {
-        // 해당 이력 모두 삭제
-        await queryRunner.manager.delete(PhoneVerification, {
-          phone: phone
-        });
+      // 당일 요청 5건 이상 금지
+      const sameDayVerificationRequest = verificationCodeList.filter((v) => {
+        let date = v.expired_date;
+        let current = new Date();
+
+        let dateString =
+          date.getFullYear() + '' + date.getMonth() + '' + date.getDate();
+        let currentString =
+          current.getFullYear() +
+          '' +
+          current.getMonth() +
+          '' +
+          current.getDate();
+
+        return dateString === currentString;
+      });
+
+      console.log(sameDayVerificationRequest);
+
+      if (sameDayVerificationRequest.length > 4) {
+        return new ResponseDto(
+          HttpStatus.UNAUTHORIZED,
+          'DAY_LIMIT_EXCEEDED',
+          true,
+          'The number of authentications allowed per day has been exceeded.'
+        );
       }
 
+      // //이전에 발급 받은 코드들 모두 expire.
+      verificationCodeList.forEach((v) => (v.is_expired = 1));
+      await this.phoneVerificationRepository.save(verificationCodeList);
+
       // 해싱
-      const salt = await bcrypt.genSalt();
-      const hashedEmail = await bcrypt.hash(phone, salt);
+      let verificationCode = Math.floor(100000 + Math.random() * 900000);
       let expiredDate = new Date();
       expiredDate.setMinutes(expiredDate.getMinutes() + 30);
 
       // DB 에 email-verification code 저장
       const emailVerification: PhoneVerification =
-        this.emailVerificationRepository.create({
+        this.phoneVerificationRepository.create({
           phone: phone,
-          verification_code: hashedEmail,
-          expired_date: expiredDate
+          verification_code: verificationCode.toString(),
+          expired_date: expiredDate,
+          is_expired: 0
         });
 
       await queryRunner.manager.save(emailVerification);
       await queryRunner.commitTransaction();
 
-      await this.sendVerifyMessage(phone, hashedEmail.slice(0, 6));
+      await this.sendVerifyMessage(phone, verificationCode.toString());
     } catch (e) {
       console.error(e);
       await queryRunner.rollbackTransaction();
@@ -80,9 +103,17 @@ export class AuthService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<ResponseDto> {
-    let { id, passcode, name } = createUserDto;
+    let { id, passcode, name, phoneNumber, verificationCode } = createUserDto;
 
     let count = await this.userRepository.count({ where: { id } });
+    let verification: PhoneVerification =
+      await this.phoneVerificationRepository.findOne({
+        where: {
+          phone: phoneNumber,
+          verification_code: verificationCode,
+          is_expired: 0
+        }
+      });
 
     if (count > 0) {
       return new ResponseDto(
@@ -90,6 +121,30 @@ export class AuthService {
         'ALREADY_EXIST_ID',
         true,
         'ALREADY_EXIST_ID'
+      );
+    }
+
+    if (!verification) {
+      return new ResponseDto(
+        HttpStatus.UNAUTHORIZED,
+        'VERIFICATION_CODE_NOT_EXIST',
+        true,
+        'This is an un-generated verification code.'
+      );
+    }
+
+    verification.expired_date.setMinutes(
+      verification.expired_date.getMinutes() - 15
+    );
+    if (
+      verification.expired_date < new Date() ||
+      verification.is_expired == 1
+    ) {
+      return new ResponseDto(
+        HttpStatus.UNAUTHORIZED,
+        'VERIFICATION_CODE_EXPIRED',
+        true,
+        'Verification code is expired.'
       );
     }
 
@@ -248,7 +303,9 @@ export class AuthService {
         { headers }
       )
       .then((res) => {
-        console.log(res);
+        console.log(
+          `Verification Code Successfully sented to ${phoneNumber} : ${verifyCode}`
+        );
       })
       .catch((e) => {
         // 에러일 경우 반환값
