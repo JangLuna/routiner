@@ -8,6 +8,9 @@ import * as bcrypt from 'bcryptjs';
 import { SignInDto } from 'src/dto/sign-in.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Routain } from 'src/entities/routain.entity';
+import { PhoneVerification } from 'src/entities/phone_verification.entity';
+import axios from 'axios';
+import { SmsClient } from '@pickk/sens';
 
 @Injectable()
 export class AuthService {
@@ -18,8 +21,75 @@ export class AuthService {
     @InjectRepository(Routain)
     private routainRepository: Repository<Routain>,
 
+    @InjectRepository(PhoneVerification)
+    private emailVerificationRepository: Repository<PhoneVerification>,
+
     private jwtService: JwtService
   ) {}
+
+  async createEmailVerificationCode(phone: string): Promise<ResponseDto> {
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const verificationCodeCount =
+        await this.emailVerificationRepository.count({
+          where: { phone: phone }
+        });
+
+      // 이전에 요청했던 이력이 있다면
+      if (verificationCodeCount > 0) {
+        // 해당 이력 모두 삭제
+        await queryRunner.manager.delete(PhoneVerification, {
+          phone: phone
+        });
+      }
+
+      // 해싱
+      const salt = await bcrypt.genSalt();
+      const hashedEmail = await bcrypt.hash(phone, salt);
+      let expiredDate = new Date();
+      expiredDate.setMinutes(expiredDate.getMinutes() + 30);
+
+      // DB 에 email-verification code 저장
+      const emailVerification: PhoneVerification =
+        this.emailVerificationRepository.create({
+          phone: phone,
+          verification_code: hashedEmail,
+          expired_date: expiredDate
+        });
+
+      await queryRunner.manager.save(emailVerification);
+      await queryRunner.commitTransaction();
+
+      const smsClient = new SmsClient({
+        accessKey: process.env.NCP_API_KEY,
+        secretKey: process.env.NCP_API_SECRET,
+        smsServiceId: process.env.SENS_SERVICE_ID,
+        callingNumber: process.env.SENS_CALLING_NUMBER
+      });
+
+      await smsClient
+        .send({
+          to: [phone],
+          content: `Hoops Verification Code ` + hashedEmail.slice(0, 6)
+        })
+        .then((res) => console.log('success'));
+    } catch (e) {
+      console.error(e);
+      await queryRunner.rollbackTransaction();
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'INTERNAL_SERVER_ERROR',
+        true,
+        'INTERNAL_SERVER_ERROR',
+        e
+      );
+    } finally {
+      await queryRunner.release();
+    }
+  }
 
   async createUser(createUserDto: CreateUserDto): Promise<ResponseDto> {
     let { id, passcode, name } = createUserDto;

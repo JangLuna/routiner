@@ -5,7 +5,7 @@ import {
   Post,
   UseGuards,
   UsePipes,
-  ValidationPipe,
+  ValidationPipe
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto } from 'src/dto/create-user.dto';
@@ -27,6 +27,11 @@ export class AuthController {
   @UsePipes(ValidationPipe)
   signIn(@Body() signInDto: SignInDto) {
     return this.authService.login(signInDto);
+  }
+
+  @Post('/send_verification_sms')
+  sendVerificationEmail(@Body('phone') phone: string) {
+    return this.authService.createEmailVerificationCode(phone);
   }
 
   @Post('/verify_token')
