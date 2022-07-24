@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Routain } from 'src/entities/routain.entity';
 import { PhoneVerification } from 'src/entities/phone_verification.entity';
 import axios from 'axios';
-import { SmsClient } from '@pickk/sens';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +39,7 @@ export class AuthService {
         });
 
       // 이전에 요청했던 이력이 있다면
-      if (verificationCodeCount > 0) {
+      if (verificationCodeCount > 4) {
         // 해당 이력 모두 삭제
         await queryRunner.manager.delete(PhoneVerification, {
           phone: phone
@@ -63,19 +63,7 @@ export class AuthService {
       await queryRunner.manager.save(emailVerification);
       await queryRunner.commitTransaction();
 
-      const smsClient = new SmsClient({
-        accessKey: process.env.NCP_API_KEY,
-        secretKey: process.env.NCP_API_SECRET,
-        smsServiceId: process.env.SENS_SERVICE_ID,
-        callingNumber: process.env.SENS_CALLING_NUMBER
-      });
-
-      await smsClient
-        .send({
-          to: [phone],
-          content: `Hoops Verification Code ` + hashedEmail.slice(0, 6)
-        })
-        .then((res) => console.log('success'));
+      await this.sendVerifyMessage(phone, hashedEmail.slice(0, 6));
     } catch (e) {
       console.error(e);
       await queryRunner.rollbackTransaction();
@@ -214,4 +202,57 @@ export class AuthService {
 
     return response;
   }
+
+  makeSignitureForSMS = (): string => {
+    let message = '';
+    const hmac = crypto.createHmac('sha256', process.env.NCP_API_SECRET);
+    const timeStamp = Date.now().toString();
+    const space = ' ';
+    const newLine = '\n';
+    const method = 'POST';
+    message += method;
+    message += space;
+    message += `/sms/v2/services/${process.env.SENS_SERVICE_ID}/messages`;
+    message += newLine;
+    message += timeStamp;
+    message += newLine;
+    message += process.env.NCP_API_KEY;
+    console.log(message);
+    const signiture = hmac.update(message).digest('base64'); // string 으로 반환
+    return signiture.toString();
+  };
+
+  sendVerifyMessage = async (phoneNumber: string, verifyCode: string) => {
+    const body = {
+      type: 'SMS',
+      from: process.env.SENS_CALLING_NUMBER,
+      content: `HOOPs verification Code : ${verifyCode}`,
+      messages: [
+        {
+          to: phoneNumber
+        }
+      ]
+    };
+
+    const headers = {
+      'Content-Type': 'application/json; charset=utf-8',
+      'x-ncp-iam-access-key': `${process.env.NCP_API_KEY}`,
+      'x-ncp-apigw-timestamp': Date.now().toString(),
+      'x-ncp-apigw-signature-v2': this.makeSignitureForSMS()
+    }; // 문자 보내기 (url)
+
+    axios
+      .post(
+        `https://sens.apigw.ntruss.com/sms/v2/services/${process.env.SENS_SERVICE_ID}/messages`,
+        body,
+        { headers }
+      )
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((e) => {
+        // 에러일 경우 반환값
+        console.log(e.response.data);
+      });
+  };
 }
