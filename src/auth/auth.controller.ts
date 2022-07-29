@@ -30,8 +30,9 @@ export class AuthController {
   }
 
   @Post('/send_verification_sms')
-  sendVerificationEmail(@Body('phone') phone: string) {
-    return this.authService.createEmailVerificationCode(phone);
+  sendVerificationSms(@Body('phone') phone: string) {
+    console.log('sms controller called');
+    return this.authService.sendVerificationSMS(phone);
   }
 
   @Post('/verify_token')

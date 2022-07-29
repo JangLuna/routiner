@@ -11,6 +11,7 @@ import { Routain } from 'src/entities/routain.entity';
 import { PhoneVerification } from 'src/entities/phone_verification.entity';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { NCPSmsResposne } from 'src/dto/NCP-sms-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +28,9 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async createEmailVerificationCode(phone: string): Promise<ResponseDto> {
+  async sendVerificationSMS(phone: string): Promise<ResponseDto> {
+    console.log('sms sevice called');
+
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -54,8 +57,6 @@ export class AuthService {
         return dateString === currentString;
       });
 
-      console.log(sameDayVerificationRequest);
-
       if (sameDayVerificationRequest.length > 4) {
         return new ResponseDto(
           HttpStatus.UNAUTHORIZED,
@@ -75,7 +76,7 @@ export class AuthService {
       expiredDate.setMinutes(expiredDate.getMinutes() + 30);
 
       // DB 에 email-verification code 저장
-      const emailVerification: PhoneVerification =
+      const phoneVerfication: PhoneVerification =
         this.phoneVerificationRepository.create({
           phone: phone,
           verification_code: verificationCode.toString(),
@@ -83,10 +84,17 @@ export class AuthService {
           is_expired: 0
         });
 
-      await queryRunner.manager.save(emailVerification);
-      await queryRunner.commitTransaction();
+      const smsResult: Boolean = await this.sendVerifyMessage(
+        phone,
+        verificationCode.toString()
+      );
 
-      await this.sendVerifyMessage(phone, verificationCode.toString());
+      if (smsResult) {
+        await queryRunner.manager.save(phoneVerfication);
+        await queryRunner.commitTransaction();
+      } else {
+        throw 'SMS send error on NCP';
+      }
     } catch (e) {
       console.error(e);
       await queryRunner.rollbackTransaction();
@@ -106,14 +114,6 @@ export class AuthService {
     let { id, passcode, name, phoneNumber, verificationCode } = createUserDto;
 
     let count = await this.userRepository.count({ where: { id } });
-    let verification: PhoneVerification =
-      await this.phoneVerificationRepository.findOne({
-        where: {
-          phone: phoneNumber,
-          verification_code: verificationCode,
-          is_expired: 0
-        }
-      });
 
     if (count > 0) {
       return new ResponseDto(
@@ -123,6 +123,20 @@ export class AuthService {
         'ALREADY_EXIST_ID'
       );
     }
+
+    let verification: PhoneVerification =
+      await this.phoneVerificationRepository.findOne({
+        where: {
+          phone: phoneNumber,
+          verification_code: verificationCode,
+          is_expired: 0
+        },
+        order: {
+          expired_date: 'ASC'
+        }
+      });
+
+    console.log(verification);
 
     if (!verification) {
       return new ResponseDto(
@@ -198,9 +212,9 @@ export class AuthService {
       if (!(await bcrypt.compare(passcode, user.passcode))) {
         return new ResponseDto(
           HttpStatus.UNAUTHORIZED,
-          'NOT_EXIST_USER',
+          'NOT_CORRECT_ID_OR_PW',
           true,
-          'NOT_EXIST_USER'
+          'NOT_CORRECT_ID_OR_PW'
         );
       } else {
         let token = await this.jwtService.sign({
@@ -277,7 +291,10 @@ export class AuthService {
     return signiture.toString();
   };
 
-  sendVerifyMessage = async (phoneNumber: string, verifyCode: string) => {
+  sendVerifyMessage = async (
+    phoneNumber: string,
+    verifyCode: string
+  ): Promise<Boolean> => {
     const body = {
       type: 'SMS',
       from: process.env.SENS_CALLING_NUMBER,
@@ -296,20 +313,17 @@ export class AuthService {
       'x-ncp-apigw-signature-v2': this.makeSignitureForSMS()
     }; // 문자 보내기 (url)
 
-    axios
-      .post(
-        `https://sens.apigw.ntruss.com/sms/v2/services/${process.env.SENS_SERVICE_ID}/messages`,
-        body,
-        { headers }
-      )
-      .then((res) => {
-        console.log(
-          `Verification Code Successfully sented to ${phoneNumber} : ${verifyCode}`
-        );
-      })
-      .catch((e) => {
-        // 에러일 경우 반환값
-        console.log(e.response.data);
-      });
+    const result = await axios.post(
+      `https://sens.apigw.ntruss.com/sms/v2/services/${process.env.SENS_SERVICE_ID}/messages`,
+      body,
+      { headers }
+    );
+
+    if (result.hasOwnProperty('error')) {
+      return false;
+    } else {
+      const response = new NCPSmsResposne(result);
+      return response.statusCode == '202';
+    }
   };
 }
