@@ -440,7 +440,7 @@ export class RoutainService {
       );
     }
 
-    if (routain.registeredUser != user) {
+    if (routain.registeredUser.idx != user.idx) {
       return new ResponseDto(
         HttpStatus.INTERNAL_SERVER_ERROR,
         'NOT_ROUTAIN_OWNER',
@@ -474,6 +474,13 @@ export class RoutainService {
       await this.routainRepository.save(routain);
 
       await queryRunner.commitTransaction();
+
+      return new ResponseDto(
+        HttpStatus.ACCEPTED,
+        'Routain Started',
+        false,
+        'Routain Started'
+      );
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(e, 'Routain start error occurred');
@@ -496,7 +503,7 @@ export class RoutainService {
       );
     }
 
-    if (routain.registeredUser != user) {
+    if (routain.registeredUser.idx != user.idx) {
       return new ResponseDto(
         HttpStatus.INTERNAL_SERVER_ERROR,
         'NOT_ROUTAIN_OWNER',
@@ -530,6 +537,13 @@ export class RoutainService {
       await this.routainRepository.save(routain);
 
       await queryRunner.commitTransaction();
+
+      return new ResponseDto(
+        HttpStatus.ACCEPTED,
+        'Routain Stopped',
+        false,
+        'Routain Stopped'
+      );
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(e, 'Routain stop error occurred');
@@ -552,7 +566,7 @@ export class RoutainService {
       );
     }
 
-    if (routain.registeredUser != user) {
+    if (routain.registeredUser.idx != user.idx) {
       return new ResponseDto(
         HttpStatus.INTERNAL_SERVER_ERROR,
         'NOT_ROUTAIN_OWNER',
@@ -577,6 +591,13 @@ export class RoutainService {
       await this.routainRepository.save(routain);
 
       await queryRunner.commitTransaction();
+
+      return new ResponseDto(
+        HttpStatus.ACCEPTED,
+        'Routain Skipped',
+        false,
+        'Routain Skipped'
+      );
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(e, 'Routain skip error occurred');

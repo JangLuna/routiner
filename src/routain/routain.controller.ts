@@ -80,19 +80,19 @@ export class RoutainController {
     return this.routainService.editRoutain(user, updateRoutainDto);
   }
 
-  @Get('/start_routain')
+  @Post('/start_routain')
   @UseGuards(AuthGuard())
   startRoutain(@GetUser() user: User, @Body('id') routainId: number) {
     return this.routainService.startRoutain(user, routainId);
   }
 
-  @Get('/stop_routain')
+  @Post('/stop_routain')
   @UseGuards(AuthGuard())
   stopRoutain(@GetUser() user: User, @Body('id') routainId: number) {
     return this.routainService.stopRoutain(user, routainId);
   }
 
-  @Get('/skip_routain')
+  @Post('/skip_routain')
   @UseGuards(AuthGuard())
   skipROutain(@GetUser() user: User, @Body('id') routainId: number) {
     return this.routainService.skipRoutain(user, routainId);

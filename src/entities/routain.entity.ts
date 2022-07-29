@@ -45,6 +45,6 @@ export class Routain extends BaseEntity {
   })
   behaviorStatus: RoutainBehaviorStatusType;
 
-  @ManyToOne((type) => User, (user) => user.atomList)
+  @ManyToOne((type) => User, (user) => user.atomList, { eager: true })
   registeredUser: User;
 }
