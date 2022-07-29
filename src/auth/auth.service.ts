@@ -75,7 +75,7 @@ export class AuthService {
       let expiredDate = new Date();
       expiredDate.setMinutes(expiredDate.getMinutes() + 30);
 
-      // DB 에 email-verification code 저장
+      // DB 에 phone-verification code 저장
       const phoneVerfication: PhoneVerification =
         this.phoneVerificationRepository.create({
           phone: phone,
