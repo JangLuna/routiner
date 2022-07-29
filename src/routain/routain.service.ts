@@ -1,4 +1,8 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isIBAN } from 'class-validator';
 import { CreateRoutainDto } from 'src/dto/create-routain.dto';
@@ -9,7 +13,10 @@ import { RoutainLog } from 'src/entities/routain-log.entity';
 import { Routain } from 'src/entities/routain.entity';
 import { RoutainAtomPair } from 'src/entities/routain_atom_pair.entity';
 import { User } from 'src/entities/user.entity';
+import { RoutainDetailModule } from 'src/routain-detail/routain-detail.module';
 import { getConnection, Repository } from 'typeorm';
+import { RoutainBehaviorStatusType } from './routain-behavior-status.enum';
+import { RoutainBehaviorType } from './routain-behavior.enum';
 
 @Injectable()
 export class RoutainService {
@@ -176,10 +183,6 @@ export class RoutainService {
       await queryRunner.release();
     }
   }
-
-  async startRoutain() {}
-
-  async stopRoutain() {}
 
   async editRoutain(
     user: User,
@@ -420,6 +423,165 @@ export class RoutainService {
       return new ResponseDto(HttpStatus.OK, 'SUCCESS', false, 'SUCCESS', {
         routain
       });
+    }
+  }
+
+  async startRoutain(user: User, routainId: number): Promise<ResponseDto> {
+    const routain: Routain = await this.routainRepository.findOne({
+      id: routainId
+    });
+
+    if (!routain) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'ROUTAIN_NOT_EXIST',
+        true,
+        'ROUTAIN_NOT_EXIST'
+      );
+    }
+
+    if (routain.registeredUser != user) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'NOT_ROUTAIN_OWNER',
+        true,
+        'NOT_ROUTAIN_OWNER'
+      );
+    }
+
+    if (routain.behaviorStatus == RoutainBehaviorStatusType.START) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'ALREADY_STARTED_ROUTAIN',
+        true,
+        'ALREADY_STARTED_ROUTAIN'
+      );
+    }
+
+    const queryRunner = getConnection().createQueryRunner();
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const routainLog = this.routainLogRepository.create({
+        routain: routain,
+        behaviorType: RoutainBehaviorType.START
+      });
+
+      routain.behaviorStatus = RoutainBehaviorStatusType.START;
+
+      await this.routainLogRepository.save(routainLog);
+      await this.routainRepository.save(routain);
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(e, 'Routain start error occurred');
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async stopRoutain(user: User, routainId: number): Promise<ResponseDto> {
+    const routain: Routain = await this.routainRepository.findOne({
+      id: routainId
+    });
+
+    if (!routain) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'ROUTAIN_NOT_EXIST',
+        true,
+        'ROUTAIN_NOT_EXIST'
+      );
+    }
+
+    if (routain.registeredUser != user) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'NOT_ROUTAIN_OWNER',
+        true,
+        'NOT_ROUTAIN_OWNER'
+      );
+    }
+
+    if (routain.behaviorStatus != RoutainBehaviorStatusType.START) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'ALREADY_STOPPED_ROUTAIN',
+        true,
+        'ALREADY_STOPPED_ROUTAIN'
+      );
+    }
+
+    const queryRunner = getConnection().createQueryRunner();
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const routainLog = this.routainLogRepository.create({
+        routain: routain,
+        behaviorType: RoutainBehaviorType.STOP
+      });
+
+      routain.behaviorStatus = RoutainBehaviorStatusType.STOP;
+
+      await this.routainLogRepository.save(routainLog);
+      await this.routainRepository.save(routain);
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(e, 'Routain stop error occurred');
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async skipRoutain(user: User, routainId: number): Promise<ResponseDto> {
+    const routain: Routain = await this.routainRepository.findOne({
+      id: routainId
+    });
+
+    if (!routain) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'ROUTAIN_NOT_EXIST',
+        true,
+        'ROUTAIN_NOT_EXIST'
+      );
+    }
+
+    if (routain.registeredUser != user) {
+      return new ResponseDto(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        'NOT_ROUTAIN_OWNER',
+        true,
+        'NOT_ROUTAIN_OWNER'
+      );
+    }
+
+    const queryRunner = getConnection().createQueryRunner();
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const routainLog = this.routainLogRepository.create({
+        routain: routain,
+        behaviorType: RoutainBehaviorType.SKIP
+      });
+
+      routain.behaviorStatus = RoutainBehaviorStatusType.STOP;
+
+      await this.routainLogRepository.save(routainLog);
+      await this.routainRepository.save(routain);
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(e, 'Routain skip error occurred');
+    } finally {
+      await queryRunner.release();
     }
   }
 }

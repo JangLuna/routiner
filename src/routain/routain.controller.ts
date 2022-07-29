@@ -11,6 +11,7 @@ import {
   ValidationPipe
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { userInfo } from 'os';
 import { GetUser } from 'src/decorators/get-user.decorator';
 import { CreateRoutainDto } from 'src/dto/create-routain.dto';
 import { UpdateRoutainDto } from 'src/dto/update-routain.dto';
@@ -47,12 +48,6 @@ export class RoutainController {
     return this.routainService.getRoutain(user, routainId);
   }
 
-  @Get('/get_is_use_routain')
-  @UseGuards(AuthGuard())
-  getIsUseRoutain(@GetUser() user: User) {
-    return this.routainService.getIsUseRoutain(user);
-  }
-
   @Get('/get_routain_list')
   @UseGuards(AuthGuard())
   getRoutainList(@GetUser() user: User) {
@@ -75,14 +70,6 @@ export class RoutainController {
     return this.routainService.deleteRoutain(user, routainId);
   }
 
-  @Get('/start_routain')
-  @UseGuards(AuthGuard())
-  startRoutain(@GetUser() user: User) {}
-
-  @Get('/stop_routain')
-  @UseGuards(AuthGuard())
-  stopRoutain(@GetUser() user: User) {}
-
   @Patch('/update_routain')
   @UseGuards(AuthGuard())
   @UsePipes(ValidationPipe)
@@ -91,5 +78,23 @@ export class RoutainController {
     @Body() updateRoutainDto: UpdateRoutainDto
   ) {
     return this.routainService.editRoutain(user, updateRoutainDto);
+  }
+
+  @Get('/start_routain')
+  @UseGuards(AuthGuard())
+  startRoutain(@GetUser() user: User, @Body('id') routainId: number) {
+    return this.routainService.startRoutain(user, routainId);
+  }
+
+  @Get('/stop_routain')
+  @UseGuards(AuthGuard())
+  stopRoutain(@GetUser() user: User, @Body('id') routainId: number) {
+    return this.routainService.stopRoutain(user, routainId);
+  }
+
+  @Get('/skip_routain')
+  @UseGuards(AuthGuard())
+  skipROutain(@GetUser() user: User, @Body('id') routainId: number) {
+    return this.routainService.skipRoutain(user, routainId);
   }
 }

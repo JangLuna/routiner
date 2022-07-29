@@ -1,3 +1,4 @@
+import { RoutainBehaviorType } from 'src/routain/routain-behavior.enum';
 import { RoutainService } from 'src/routain/routain.service';
 import {
   BaseEntity,
@@ -6,7 +7,7 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 import { Routain } from './routain.entity';
 
@@ -16,9 +17,12 @@ export class RoutainLog extends BaseEntity {
   id: number;
 
   @ManyToOne((type) => Routain, (routain) => routain.logList, {
-    onDelete: 'CASCADE',
+    onDelete: 'CASCADE'
   })
   routain: Routain;
+
+  @Column({ nullable: false })
+  behaviorType: RoutainBehaviorType;
 
   @CreateDateColumn()
   createdDate: Date;

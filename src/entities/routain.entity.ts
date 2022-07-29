@@ -1,10 +1,12 @@
+import { RoutainBehaviorStatusType } from 'src/routain/routain-behavior-status.enum';
+import { RoutainBehaviorType } from 'src/routain/routain-behavior.enum';
 import {
   BaseEntity,
   Column,
   Entity,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn
 } from 'typeorm';
 import { Atom } from './atom.entity';
 import { RoutainLog } from './routain-log.entity';
@@ -21,7 +23,7 @@ export class Routain extends BaseEntity {
 
   @OneToMany((type) => RoutainAtomPair, (pair) => pair.routain, {
     nullable: true,
-    cascade: true,
+    cascade: true
   })
   atomList: Atom[];
 
@@ -30,12 +32,18 @@ export class Routain extends BaseEntity {
 
   @OneToMany((type) => RoutainLog, (log) => log.routain, {
     nullable: true,
-    cascade: true,
+    cascade: true
   })
   logList: RoutainLog[];
 
   @Column()
   isUse: boolean;
+
+  @Column({
+    default: RoutainBehaviorStatusType.STOP,
+    nullable: false
+  })
+  behaviorStatus: RoutainBehaviorStatusType;
 
   @ManyToOne((type) => User, (user) => user.atomList)
   registeredUser: User;
