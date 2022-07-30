@@ -1,4 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateAtomDto } from 'src/dto/create-atom.dto';
 import { ResponseDto } from 'src/dto/response.dto';
@@ -11,35 +18,37 @@ import { AtomType } from './atom-type.enum';
 export class AtomService {
   constructor(
     @InjectRepository(Atom)
-    private atomRepository: Repository<Atom>,
+    private atomRepository: Repository<Atom>
   ) {}
 
   async createAtom(
     user: User,
-    createAtomDto: CreateAtomDto,
+    createAtomDto: CreateAtomDto
   ): Promise<ResponseDto> {
     let { text, type } = createAtomDto;
 
     let count = await this.atomRepository.count({
       where: {
         registeredUser: user,
-        text,
-      },
+        text
+      }
     });
 
     if (count > 0) {
-      return new ResponseDto(
-        HttpStatus.CONFLICT,
-        'ALREADY_EXIST_ATOM',
-        true,
-        'ALREADY_EXIST_ATOM',
+      throw new ConflictException(
+        new ResponseDto(
+          HttpStatus.CONFLICT,
+          'ALREADY_EXIST_ATOM',
+          true,
+          'ALREADY_EXIST_ATOM'
+        )
       );
     }
 
     let atom: Atom = this.atomRepository.create({
       text: text,
       type,
-      registeredUser: user,
+      registeredUser: user
     });
 
     const queryRunner = getConnection().createQueryRunner();
@@ -57,16 +66,18 @@ export class AtomService {
         'SUCCESS',
         false,
         'SUCCESS',
-        atom,
+        atom
       );
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      return new ResponseDto(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'INTERNAL_SERVER_ERROR',
-        true,
-        'INTERNAL_SERVER_ERROR',
-        e,
+      throw new InternalServerErrorException(
+        new ResponseDto(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          'INTERNAL_SERVER_ERROR',
+          true,
+          'INTERNAL_SERVER_ERROR',
+          e
+        )
       );
     } finally {
       await queryRunner.release();
@@ -76,33 +87,39 @@ export class AtomService {
   async deleteAtom(user: User, atomId: number): Promise<ResponseDto> {
     const atom = await this.atomRepository.findOne({
       relations: ['registeredUser', 'routainList'],
-      where: { id: atomId },
+      where: { id: atomId }
     });
 
     if (!atom) {
-      return new ResponseDto(
-        HttpStatus.NOT_FOUND,
-        'UNREGISTERED_ATOM',
-        true,
-        'UNREGISTERED_ATOM',
+      throw new NotFoundException(
+        new ResponseDto(
+          HttpStatus.NOT_FOUND,
+          'UNREGISTERED_ATOM',
+          true,
+          'UNREGISTERED_ATOM'
+        )
       );
     }
 
     if (atom.registeredUser.idx != user.idx) {
-      return new ResponseDto(
-        HttpStatus.UNAUTHORIZED,
-        'NOT_ATOM_OWNER',
-        true,
-        'NOT_ATOM_OWNER',
+      throw new UnauthorizedException(
+        new ResponseDto(
+          HttpStatus.UNAUTHORIZED,
+          'NOT_ATOM_OWNER',
+          true,
+          'NOT_ATOM_OWNER'
+        )
       );
     }
 
     if (atom.routainList.length > 0) {
-      return new ResponseDto(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'USING_ATOM',
-        true,
-        'USING_ATOM',
+      throw new InternalServerErrorException(
+        new ResponseDto(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          'USING_ATOM',
+          true,
+          'USING_ATOM'
+        )
       );
     }
 
@@ -116,12 +133,14 @@ export class AtomService {
       return new ResponseDto(200, 'SUCCESS', false, 'SUCCESS', result);
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      return new ResponseDto(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'INTERNAL_SERVER_ERROR',
-        true,
-        'INTERNAL_SERVER_ERROR',
-        e,
+      throw new InternalServerErrorException(
+        new ResponseDto(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          'INTERNAL_SERVER_ERROR',
+          true,
+          'INTERNAL_SERVER_ERROR',
+          e
+        )
       );
     } finally {
       await queryRunner.release();
@@ -133,29 +152,11 @@ export class AtomService {
   async getAtomList(user: User): Promise<ResponseDto> {
     const atomList = await this.atomRepository.find({
       where: { registeredUser: user },
-      order: { createdDate: 'ASC' },
+      order: { createdDate: 'ASC' }
     });
 
-    // let mustAtomList: Atom[] = [];
-    // let wantAtomList: Atom[] = [];
-
-    // if (atomList.length > 0) {
-    //   for (let i in atomList) {
-    //     let atom: Atom = atomList[i];
-    //     delete atom.registeredUser;
-
-    //     if (atom.type == AtomType.MUST) {
-    //       mustAtomList.push(atom);
-    //     } else {
-    //       wantAtomList.push(atom);
-    //     }
-    //   }
-    // }
-
     return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS', {
-      totalAtomList: atomList,
-      // mustAtomList,
-      // wantAtomList,
+      totalAtomList: atomList
     });
   }
 }
