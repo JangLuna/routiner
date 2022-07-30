@@ -19,6 +19,7 @@ import { PhoneVerification } from 'src/entities/phone_verification.entity';
 import axios from 'axios';
 import * as crypto from 'crypto';
 import { NCPSmsResposne } from 'src/dto/NCP-sms-response.dto';
+import { ResponseMessage } from 'src/enums/response-message.enum';
 
 @Injectable()
 export class AuthService {
@@ -36,8 +37,6 @@ export class AuthService {
   ) {}
 
   async sendVerificationSMS(phone: string): Promise<ResponseDto> {
-    console.log('sms sevice called');
-
     const queryRunner = getConnection().createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -67,10 +66,10 @@ export class AuthService {
       if (sameDayVerificationRequest.length > 4) {
         throw new ForbiddenException(
           new ResponseDto(
-            HttpStatus.UNAUTHORIZED,
+            HttpStatus.FORBIDDEN,
             'DAY_LIMIT_EXCEEDED',
             true,
-            'The number of authentications allowed per day has been exceeded.'
+            ResponseMessage.DAY_LIMIT_EXCEEDED
           )
         );
       }
@@ -103,13 +102,21 @@ export class AuthService {
         await queryRunner.commitTransaction();
         return new ResponseDto(
           HttpStatus.ACCEPTED,
-          `Verification SMS is sent successfully.`,
+          `SUCCESS`,
           false,
-          `Verification SMS is sent successfully.`,
+          ResponseMessage.SMS_SENT_SUCCESSFULLY,
           smsResult
         );
       } else {
-        throw 'SMS send error on NCP';
+        throw new InternalServerErrorException(
+          new ResponseDto(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            'INTERNAL_SERVER_ERROR',
+            true,
+            ResponseMessage.SMS_SEND_ERROR_NCP,
+            smsResult
+          )
+        );
       }
     } catch (e) {
       console.error(e);
@@ -119,7 +126,7 @@ export class AuthService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -139,7 +146,7 @@ export class AuthService {
           HttpStatus.CONFLICT,
           'ALREADY_EXIST_ID',
           true,
-          'ALREADY_EXIST_ID'
+          ResponseMessage.ALREADY_EXIST_ID
         )
       );
     }
@@ -160,9 +167,9 @@ export class AuthService {
       throw new UnauthorizedException(
         new ResponseDto(
           HttpStatus.UNAUTHORIZED,
-          'VERIFICATION_CODE_NOT_EXIST',
+          'NOT_VALID_VERIFICATION_CODE',
           true,
-          'This is an un-generated verification code.'
+          ResponseMessage.NOT_VALID_VERIFICATION_CODE
         )
       );
     }
@@ -179,7 +186,7 @@ export class AuthService {
           HttpStatus.UNAUTHORIZED,
           'VERIFICATION_CODE_EXPIRED',
           true,
-          'Verification code is expired.'
+          ResponseMessage.VERIFICATION_CODE_EXPIRED
         )
       );
     }
@@ -201,7 +208,13 @@ export class AuthService {
       user = await queryRunner.manager.save(user);
 
       await queryRunner.commitTransaction();
-      return new ResponseDto(200, 'SUCCESS', false, 'SUCCESS', user);
+      return new ResponseDto(
+        HttpStatus.CREATED,
+        'SUCCESS',
+        false,
+        'SUCCESS',
+        user
+      );
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(
@@ -209,7 +222,7 @@ export class AuthService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -231,7 +244,7 @@ export class AuthService {
           HttpStatus.UNAUTHORIZED,
           'NOT_EXIST_USER',
           true,
-          'NOT_EXIST_USER'
+          ResponseMessage.NOT_EXIST_USER
         )
       );
     } else {
@@ -241,7 +254,7 @@ export class AuthService {
             HttpStatus.UNAUTHORIZED,
             'NOT_CORRECT_ID_OR_PW',
             true,
-            'NOT_CORRECT_ID_OR_PW'
+            ResponseMessage.NOT_CORRECT_ID_OR_PW
           )
         );
       } else {
@@ -252,9 +265,9 @@ export class AuthService {
 
         return new ResponseDto(
           HttpStatus.ACCEPTED,
-          'SIGN_IN_SUCCESS',
+          'SUCCESS',
           false,
-          'SIGN_IN_SUCCESS',
+          'SUCCESS',
           { token: token }
         );
       }
@@ -267,7 +280,15 @@ export class AuthService {
     try {
       payload = await this.jwtService.verify(token);
     } catch (err) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        new ResponseDto(
+          HttpStatus.UNAUTHORIZED,
+          'TOKEN_EXPIRED',
+          false,
+          ResponseMessage.TOKEN_EXPIRED,
+          { token: token }
+        )
+      );
     }
 
     const expireDate = new Date(0);

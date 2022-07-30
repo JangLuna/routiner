@@ -11,6 +11,7 @@ import { CreateAtomDto } from 'src/dto/create-atom.dto';
 import { ResponseDto } from 'src/dto/response.dto';
 import { Atom } from 'src/entities/atom.entity';
 import { User } from 'src/entities/user.entity';
+import { ResponseMessage } from 'src/enums/response-message.enum';
 import { getConnection, Repository } from 'typeorm';
 import { AtomType } from './atom-type.enum';
 
@@ -30,7 +31,8 @@ export class AtomService {
     let count = await this.atomRepository.count({
       where: {
         registeredUser: user,
-        text
+        text,
+        type
       }
     });
 
@@ -40,7 +42,7 @@ export class AtomService {
           HttpStatus.CONFLICT,
           'ALREADY_EXIST_ATOM',
           true,
-          'ALREADY_EXIST_ATOM'
+          ResponseMessage.ALREADY_EXIST_ATOM
         )
       );
     }
@@ -62,7 +64,7 @@ export class AtomService {
       delete atom.registeredUser;
 
       return new ResponseDto(
-        HttpStatus.ACCEPTED,
+        HttpStatus.CREATED,
         'SUCCESS',
         false,
         'SUCCESS',
@@ -75,7 +77,7 @@ export class AtomService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -96,7 +98,7 @@ export class AtomService {
           HttpStatus.NOT_FOUND,
           'UNREGISTERED_ATOM',
           true,
-          'UNREGISTERED_ATOM'
+          ResponseMessage.UNREGISTERED_ATOM
         )
       );
     }
@@ -107,7 +109,7 @@ export class AtomService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ATOM_OWNER',
           true,
-          'NOT_ATOM_OWNER'
+          ResponseMessage.UNAUTHORIZED
         )
       );
     }
@@ -118,7 +120,7 @@ export class AtomService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'USING_ATOM',
           true,
-          'USING_ATOM'
+          ResponseMessage.ATOM_IS_USING
         )
       );
     }
@@ -130,7 +132,13 @@ export class AtomService {
     try {
       const result = await queryRunner.manager.delete(Atom, { id: atom.id });
       await queryRunner.commitTransaction();
-      return new ResponseDto(200, 'SUCCESS', false, 'SUCCESS', result);
+      return new ResponseDto(
+        HttpStatus.OK,
+        'SUCCESS',
+        false,
+        'SUCCESS',
+        result
+      );
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(
@@ -138,7 +146,7 @@ export class AtomService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -147,15 +155,13 @@ export class AtomService {
     }
   }
 
-  async editAtom() {}
-
   async getAtomList(user: User): Promise<ResponseDto> {
     const atomList = await this.atomRepository.find({
       where: { registeredUser: user },
       order: { createdDate: 'ASC' }
     });
 
-    return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS', {
+    return new ResponseDto(HttpStatus.OK, 'SUCCESS', false, 'SUCCESS', {
       totalAtomList: atomList
     });
   }

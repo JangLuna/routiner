@@ -18,6 +18,7 @@ import { RoutainLog } from 'src/entities/routain-log.entity';
 import { Routain } from 'src/entities/routain.entity';
 import { RoutainAtomPair } from 'src/entities/routain_atom_pair.entity';
 import { User } from 'src/entities/user.entity';
+import { ResponseMessage } from 'src/enums/response-message.enum';
 import { RoutainDetailModule } from 'src/routain-detail/routain-detail.module';
 import { getConnection, Repository } from 'typeorm';
 import { RoutainBehaviorStatusType } from './routain-behavior-status.enum';
@@ -59,7 +60,7 @@ export class RoutainService {
           HttpStatus.CONFLICT,
           'ALREADY_EXIST_ROUTAIN',
           false,
-          'Already exist routain.'
+          ResponseMessage.ALREADY_EXIST_ROUTAIN
         )
       );
     }
@@ -86,7 +87,7 @@ export class RoutainService {
             HttpStatus.NOT_FOUND,
             'UNREGISTERED_ATOM',
             false,
-            'Unregistered atom'
+            ResponseMessage.UNREGISTERED_ATOM
           )
         );
       }
@@ -142,7 +143,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'Internal server error',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -163,7 +164,7 @@ export class RoutainService {
           HttpStatus.NOT_FOUND,
           'UNREGISTERED_ROUTAIN',
           true,
-          'Unregistered routain'
+          ResponseMessage.UNREGISTERED_ATOM
         )
       );
     }
@@ -174,7 +175,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          `You're not routain owner`
+          ResponseMessage.UNAUTHORIZED
         )
       );
     }
@@ -192,7 +193,7 @@ export class RoutainService {
         HttpStatus.OK,
         'SUCCESS',
         false,
-        'Routain is successfully generated',
+        'SUCCESS',
         result
       );
     } catch (e) {
@@ -203,7 +204,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'Internal server error',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -229,7 +230,7 @@ export class RoutainService {
           HttpStatus.NOT_FOUND,
           'UNREGISTERED_ROUTAIN',
           true,
-          'Unregistered routain.'
+          ResponseMessage.UNREGISTERED_ROUTAIN
         )
       );
     }
@@ -240,7 +241,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          `You're not routain owner.`
+          ResponseMessage.UNAUTHORIZED
         )
       );
     }
@@ -270,7 +271,7 @@ export class RoutainService {
             HttpStatus.NOT_FOUND,
             'UNREGISTERED_ATOM',
             false,
-            'Unregistered atom'
+            ResponseMessage.UNREGISTERED_ATOM
           )
         );
       }
@@ -300,15 +301,9 @@ export class RoutainService {
       }
 
       await queryRunner.commitTransaction();
-      return new ResponseDto(
-        HttpStatus.OK,
-        'SUCCESS',
-        false,
-        'Routain edit success.',
-        {
-          routain
-        }
-      );
+      return new ResponseDto(HttpStatus.OK, 'SUCCESS', false, 'SUCCESS', {
+        routain
+      });
     } catch (e) {
       console.error(e);
       await queryRunner.rollbackTransaction();
@@ -317,7 +312,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'Internal server error',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -344,7 +339,7 @@ export class RoutainService {
             HttpStatus.NOT_FOUND,
             'NOT_FOUNDED',
             true,
-            'Use Routain not founded.'
+            ResponseMessage.NOT_FOUNDED
           )
         );
       }
@@ -358,7 +353,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'Internal server error',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -387,7 +382,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'Internal server error',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -399,7 +394,7 @@ export class RoutainService {
           HttpStatus.NOT_FOUND,
           'NOT_FOUNED',
           true,
-          'Routain is not found'
+          ResponseMessage.ROUTAIN_NOT_FOUNDED
         )
       );
     }
@@ -431,13 +426,7 @@ export class RoutainService {
       `);
 
       await queryRunner.commitTransaction();
-      return new ResponseDto(
-        HttpStatus.ACCEPTED,
-        'SUCCESS',
-        false,
-        'This routain set use-routain.',
-        {}
-      );
+      return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS');
     } catch (e) {
       console.log(e);
       await queryRunner.rollbackTransaction();
@@ -446,7 +435,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'Internal server error',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -470,7 +459,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'Internal server error'
+          ResponseMessage.INTERNAL_SERVER_ERROR
         )
       );
     }
@@ -480,7 +469,7 @@ export class RoutainService {
     let routain: Routain = null;
     try {
       routain = await this.routainRepository.findOne({
-        where: { registeredUser: user, id }
+        where: { id }
       });
 
       if (!routain) {
@@ -489,10 +478,23 @@ export class RoutainService {
             HttpStatus.NOT_FOUND,
             'UNREGISTRED_ATOM',
             true,
-            'Unregistered atom.'
+            ResponseMessage.UNREGISTERED_ATOM
           )
         );
-      } else {
+      }
+
+      if (routain.registeredUser.idx != user.idx) {
+        throw new UnauthorizedException(
+          new ResponseDto(
+            HttpStatus.UNAUTHORIZED,
+            'NOT_ROUTAIN_OWNER',
+            true,
+            ResponseMessage.UNAUTHORIZED
+          )
+        );
+      }
+
+      {
         delete routain.registeredUser;
 
         return new ResponseDto(HttpStatus.OK, 'SUCCESS', false, 'SUCCESS', {
@@ -506,7 +508,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'Internal server error'
+          ResponseMessage.INTERNAL_SERVER_ERROR
         )
       );
     }
@@ -523,7 +525,7 @@ export class RoutainService {
           HttpStatus.NOT_FOUND,
           'ROUTAIN_NOT_EXIST',
           true,
-          'Routain new exist.'
+          ResponseMessage.UNREGISTERED_ROUTAIN
         )
       );
     }
@@ -534,7 +536,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          `You're not routain owner.`
+          ResponseMessage.UNAUTHORIZED
         )
       );
     }
@@ -545,7 +547,7 @@ export class RoutainService {
           HttpStatus.BAD_REQUEST,
           'ALREADY_STARTED_ROUTAIN',
           true,
-          'Already started routain'
+          ResponseMessage.ALREADY_STARTED_ROUTAIN
         )
       );
     }
@@ -567,21 +569,16 @@ export class RoutainService {
 
       await queryRunner.commitTransaction();
 
-      return new ResponseDto(
-        HttpStatus.ACCEPTED,
-        'SUCCESS',
-        false,
-        'Routain Started'
-      );
+      return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS');
     } catch (e) {
       console.log(e);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(
         new ResponseDto(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          'Routain start error occurred',
+          'INTERNAL_SERVER_ERROR',
           true,
-          'Routain start error occurred',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -598,10 +595,10 @@ export class RoutainService {
     if (!routain) {
       throw new NotFoundException(
         new ResponseDto(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          'ROUTAIN_NOT_EXIST',
+          HttpStatus.NOT_FOUND,
+          'UNREGISTERED_ROUTAIN',
           true,
-          'Routain not exist.'
+          ResponseMessage.UNREGISTERED_ROUTAIN
         )
       );
     }
@@ -612,7 +609,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          `You're not routain owner.`
+          ResponseMessage.UNAUTHORIZED
         )
       );
     }
@@ -623,7 +620,7 @@ export class RoutainService {
           HttpStatus.BAD_REQUEST,
           'ALREADY_STOPPED_ROUTAIN',
           true,
-          'Already stopped routain.'
+          ResponseMessage.ALREADY_STOPPED_ROUTAIN
         )
       );
     }
@@ -645,20 +642,15 @@ export class RoutainService {
 
       await queryRunner.commitTransaction();
 
-      return new ResponseDto(
-        HttpStatus.ACCEPTED,
-        'SUCCESS',
-        false,
-        'Routain Stopped'
-      );
+      return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS');
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(
         new ResponseDto(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          'Routain stop error occurred',
+          'INTERNAL_SERVER_ERROR',
           true,
-          'Routain stop error occurred',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
@@ -675,10 +667,10 @@ export class RoutainService {
     if (!routain) {
       throw new NotFoundException(
         new ResponseDto(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          'ROUTAIN_NOT_EXIST',
+          HttpStatus.NOT_FOUND,
+          'UNREGISTERED_ROUTAIN',
           true,
-          'Routain not exist.'
+          ResponseMessage.UNREGISTERED_ROUTAIN
         )
       );
     }
@@ -689,7 +681,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          `You're not routain owner`
+          ResponseMessage.UNAUTHORIZED
         )
       );
     }
@@ -711,20 +703,15 @@ export class RoutainService {
 
       await queryRunner.commitTransaction();
 
-      return new ResponseDto(
-        HttpStatus.ACCEPTED,
-        'SUCCESS',
-        false,
-        'Routain Skipped'
-      );
+      return new ResponseDto(HttpStatus.ACCEPTED, 'SUCCESS', false, 'SUCCESS');
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(
         new ResponseDto(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          'Routain skip error occurred',
+          'INTERNAL_SERVER_ERROR',
           true,
-          'Routain skip error occurred',
+          ResponseMessage.INTERNAL_SERVER_ERROR,
           e
         )
       );
