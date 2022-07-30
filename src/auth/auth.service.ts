@@ -1,4 +1,11 @@
-import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { ResponseDto } from 'src/dto/response.dto';
@@ -58,11 +65,13 @@ export class AuthService {
       });
 
       if (sameDayVerificationRequest.length > 4) {
-        return new ResponseDto(
-          HttpStatus.UNAUTHORIZED,
-          'DAY_LIMIT_EXCEEDED',
-          true,
-          'The number of authentications allowed per day has been exceeded.'
+        throw new ForbiddenException(
+          new ResponseDto(
+            HttpStatus.UNAUTHORIZED,
+            'DAY_LIMIT_EXCEEDED',
+            true,
+            'The number of authentications allowed per day has been exceeded.'
+          )
         );
       }
 
@@ -92,18 +101,27 @@ export class AuthService {
       if (smsResult) {
         await queryRunner.manager.save(phoneVerfication);
         await queryRunner.commitTransaction();
+        return new ResponseDto(
+          HttpStatus.ACCEPTED,
+          `Verification SMS is sent successfully.`,
+          false,
+          `Verification SMS is sent successfully.`,
+          smsResult
+        );
       } else {
         throw 'SMS send error on NCP';
       }
     } catch (e) {
       console.error(e);
       await queryRunner.rollbackTransaction();
-      return new ResponseDto(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'INTERNAL_SERVER_ERROR',
-        true,
-        'INTERNAL_SERVER_ERROR',
-        e
+      throw new InternalServerErrorException(
+        new ResponseDto(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          'INTERNAL_SERVER_ERROR',
+          true,
+          'INTERNAL_SERVER_ERROR',
+          e
+        )
       );
     } finally {
       await queryRunner.release();
@@ -116,11 +134,13 @@ export class AuthService {
     let count = await this.userRepository.count({ where: { id } });
 
     if (count > 0) {
-      return new ResponseDto(
-        HttpStatus.CONFLICT,
-        'ALREADY_EXIST_ID',
-        true,
-        'ALREADY_EXIST_ID'
+      throw new ConflictException(
+        new ResponseDto(
+          HttpStatus.CONFLICT,
+          'ALREADY_EXIST_ID',
+          true,
+          'ALREADY_EXIST_ID'
+        )
       );
     }
 
@@ -136,14 +156,14 @@ export class AuthService {
         }
       });
 
-    console.log(verification);
-
     if (!verification) {
-      return new ResponseDto(
-        HttpStatus.UNAUTHORIZED,
-        'VERIFICATION_CODE_NOT_EXIST',
-        true,
-        'This is an un-generated verification code.'
+      throw new UnauthorizedException(
+        new ResponseDto(
+          HttpStatus.UNAUTHORIZED,
+          'VERIFICATION_CODE_NOT_EXIST',
+          true,
+          'This is an un-generated verification code.'
+        )
       );
     }
 
@@ -154,11 +174,13 @@ export class AuthService {
       verification.expired_date < new Date() ||
       verification.is_expired == 1
     ) {
-      return new ResponseDto(
-        HttpStatus.UNAUTHORIZED,
-        'VERIFICATION_CODE_EXPIRED',
-        true,
-        'Verification code is expired.'
+      throw new UnauthorizedException(
+        new ResponseDto(
+          HttpStatus.UNAUTHORIZED,
+          'VERIFICATION_CODE_EXPIRED',
+          true,
+          'Verification code is expired.'
+        )
       );
     }
 
@@ -182,12 +204,14 @@ export class AuthService {
       return new ResponseDto(200, 'SUCCESS', false, 'SUCCESS', user);
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      return new ResponseDto(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        'INTERNAL_SERVER_ERROR',
-        true,
-        'INTERNAL_SERVER_ERROR',
-        e
+      throw new InternalServerErrorException(
+        new ResponseDto(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          'INTERNAL_SERVER_ERROR',
+          true,
+          'INTERNAL_SERVER_ERROR',
+          e
+        )
       );
     } finally {
       await queryRunner.release();
@@ -202,19 +226,23 @@ export class AuthService {
     const user: User = await this.userRepository.findOne({ id });
 
     if (!user) {
-      return new ResponseDto(
-        HttpStatus.UNAUTHORIZED,
-        'NOT_EXIST_USER',
-        true,
-        'NOT_EXIST_USER'
+      throw new UnauthorizedException(
+        new ResponseDto(
+          HttpStatus.UNAUTHORIZED,
+          'NOT_EXIST_USER',
+          true,
+          'NOT_EXIST_USER'
+        )
       );
     } else {
       if (!(await bcrypt.compare(passcode, user.passcode))) {
-        return new ResponseDto(
-          HttpStatus.UNAUTHORIZED,
-          'NOT_CORRECT_ID_OR_PW',
-          true,
-          'NOT_CORRECT_ID_OR_PW'
+        throw new UnauthorizedException(
+          new ResponseDto(
+            HttpStatus.UNAUTHORIZED,
+            'NOT_CORRECT_ID_OR_PW',
+            true,
+            'NOT_CORRECT_ID_OR_PW'
+          )
         );
       } else {
         let token = await this.jwtService.sign({
