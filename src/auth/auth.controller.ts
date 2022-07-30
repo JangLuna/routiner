@@ -35,8 +35,8 @@ export class AuthController {
     return this.authService.sendVerificationSMS(phone);
   }
 
-  @Post('/verify_token')
-  verifyToken(@Body('token') token: string) {
-    return this.authService.verifyToken(token);
-  }
+  // @Post('/verify_token')
+  // verifyToken(@Body('token') token: string) {
+  //   return this.authService.verifyToken(token);
+  // }
 }

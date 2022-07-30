@@ -274,52 +274,52 @@ export class AuthService {
     }
   }
 
-  async verifyToken(token: string) {
-    let payload = undefined;
+  // async verifyToken(token: string) {
+  //   let payload = undefined;
 
-    try {
-      payload = await this.jwtService.verify(token);
-    } catch (err) {
-      throw new UnauthorizedException(
-        new ResponseDto(
-          HttpStatus.UNAUTHORIZED,
-          'TOKEN_EXPIRED',
-          false,
-          ResponseMessage.TOKEN_EXPIRED,
-          { token: token }
-        )
-      );
-    }
+  //   try {
+  //     payload = await this.jwtService.verify(token);
+  //   } catch (err) {
+  //     throw new UnauthorizedException(
+  //       new ResponseDto(
+  //         HttpStatus.UNAUTHORIZED,
+  //         'TOKEN_EXPIRED',
+  //         false,
+  //         ResponseMessage.TOKEN_EXPIRED,
+  //         { token: token }
+  //       )
+  //     );
+  //   }
 
-    const expireDate = new Date(0);
-    expireDate.setUTCSeconds(payload['exp']);
+  //   const expireDate = new Date(0);
+  //   expireDate.setUTCSeconds(payload['exp']);
 
-    const user: User = await this.userRepository.findOne({
-      where: {
-        id: payload['id'],
-        name: payload['name']
-      }
-    });
+  //   const user: User = await this.userRepository.findOne({
+  //     where: {
+  //       id: payload['id'],
+  //       name: payload['name']
+  //     }
+  //   });
 
-    const routain: Routain = await this.routainRepository.findOne({
-      where: {
-        registeredUser: user,
-        isUse: true
-      }
-    });
+  //   const routain: Routain = await this.routainRepository.findOne({
+  //     where: {
+  //       registeredUser: user,
+  //       isUse: true
+  //     }
+  //   });
 
-    const expired = expireDate < new Date();
-    const response = {
-      expired
-    };
+  //   const expired = expireDate < new Date();
+  //   const response = {
+  //     expired
+  //   };
 
-    if (!expired && routain != undefined) {
-      delete routain.registeredUser;
-      response['routain'] = routain;
-    }
+  //   if (!expired && routain != undefined) {
+  //     delete routain.registeredUser;
+  //     response['routain'] = routain;
+  //   }
 
-    return response;
-  }
+  //   return response;
+  // }
 
   makeSignitureForSMS = (): string => {
     let message = '';
