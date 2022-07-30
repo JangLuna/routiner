@@ -59,7 +59,7 @@ export class RoutainService {
           HttpStatus.CONFLICT,
           'ALREADY_EXIST_ROUTAIN',
           false,
-          'ALREADY_EXIST_ROUTAIN'
+          'Already exist routain.'
         )
       );
     }
@@ -86,7 +86,7 @@ export class RoutainService {
             HttpStatus.NOT_FOUND,
             'UNREGISTERED_ATOM',
             false,
-            'UNREGISTERED_ATOM'
+            'Unregistered atom'
           )
         );
       }
@@ -142,7 +142,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          'Internal server error',
           e
         )
       );
@@ -163,7 +163,7 @@ export class RoutainService {
           HttpStatus.NOT_FOUND,
           'UNREGISTERED_ROUTAIN',
           true,
-          'UNREGISTERED_ROUTAIN'
+          'Unregistered routain'
         )
       );
     }
@@ -174,7 +174,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          'NOT_ROUTAIN_OWNER'
+          `You're not routain owner`
         )
       );
     }
@@ -192,7 +192,7 @@ export class RoutainService {
         HttpStatus.OK,
         'SUCCESS',
         false,
-        'SUCCESS',
+        'Routain is successfully generated',
         result
       );
     } catch (e) {
@@ -203,7 +203,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          'Internal server error',
           e
         )
       );
@@ -229,7 +229,7 @@ export class RoutainService {
           HttpStatus.NOT_FOUND,
           'UNREGISTERED_ROUTAIN',
           true,
-          'UNREGISTERED_ROUTAIN'
+          'Unregistered routain.'
         )
       );
     }
@@ -240,7 +240,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          'NOT_ROUTAIN_OWNER'
+          `You're not routain owner.`
         )
       );
     }
@@ -270,7 +270,7 @@ export class RoutainService {
             HttpStatus.NOT_FOUND,
             'UNREGISTERED_ATOM',
             false,
-            'UNREGISTERED_ATOM'
+            'Unregistered atom'
           )
         );
       }
@@ -300,9 +300,15 @@ export class RoutainService {
       }
 
       await queryRunner.commitTransaction();
-      return new ResponseDto(HttpStatus.OK, 'SUCCESS', false, 'SUCCESS', {
-        routain
-      });
+      return new ResponseDto(
+        HttpStatus.OK,
+        'SUCCESS',
+        false,
+        'Routain edit success.',
+        {
+          routain
+        }
+      );
     } catch (e) {
       console.error(e);
       await queryRunner.rollbackTransaction();
@@ -311,7 +317,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          'Internal server error',
           e
         )
       );
@@ -336,7 +342,7 @@ export class RoutainService {
         throw new NotFoundException(
           new ResponseDto(
             HttpStatus.NOT_FOUND,
-            'Use Routain not founded.',
+            'NOT_FOUNDED',
             true,
             'Use Routain not founded.'
           )
@@ -352,7 +358,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          'Internal server error',
           e
         )
       );
@@ -381,7 +387,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          'Internal server error',
           e
         )
       );
@@ -391,7 +397,7 @@ export class RoutainService {
       throw new NotFoundException(
         new ResponseDto(
           HttpStatus.NOT_FOUND,
-          'Routain is not found',
+          'NOT_FOUNED',
           true,
           'Routain is not found'
         )
@@ -429,7 +435,7 @@ export class RoutainService {
         HttpStatus.ACCEPTED,
         'SUCCESS',
         false,
-        'SUCCESS',
+        'This routain set use-routain.',
         {}
       );
     } catch (e) {
@@ -440,7 +446,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'INTERNAL_SERVER_ERROR',
           true,
-          'INTERNAL_SERVER_ERROR',
+          'Internal server error',
           e
         )
       );
@@ -462,7 +468,7 @@ export class RoutainService {
       throw new InternalServerErrorException(
         new ResponseDto(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          'Internal server error',
+          'INTERNAL_SERVER_ERROR',
           true,
           'Internal server error'
         )
@@ -483,7 +489,7 @@ export class RoutainService {
             HttpStatus.NOT_FOUND,
             'UNREGISTRED_ATOM',
             true,
-            'UNREGISTRED_ATOM'
+            'Unregistered atom.'
           )
         );
       } else {
@@ -498,7 +504,7 @@ export class RoutainService {
       throw new InternalServerErrorException(
         new ResponseDto(
           HttpStatus.INTERNAL_SERVER_ERROR,
-          'Internal server error',
+          'INTERNAL_SERVER_ERROR',
           true,
           'Internal server error'
         )
@@ -517,7 +523,7 @@ export class RoutainService {
           HttpStatus.NOT_FOUND,
           'ROUTAIN_NOT_EXIST',
           true,
-          'ROUTAIN_NOT_EXIST'
+          'Routain new exist.'
         )
       );
     }
@@ -528,7 +534,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          'NOT_ROUTAIN_OWNER'
+          `You're not routain owner.`
         )
       );
     }
@@ -539,7 +545,7 @@ export class RoutainService {
           HttpStatus.BAD_REQUEST,
           'ALREADY_STARTED_ROUTAIN',
           true,
-          'ALREADY_STARTED_ROUTAIN'
+          'Already started routain'
         )
       );
     }
@@ -563,7 +569,7 @@ export class RoutainService {
 
       return new ResponseDto(
         HttpStatus.ACCEPTED,
-        'Routain Started',
+        'SUCCESS',
         false,
         'Routain Started'
       );
@@ -595,7 +601,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'ROUTAIN_NOT_EXIST',
           true,
-          'ROUTAIN_NOT_EXIST'
+          'Routain not exist.'
         )
       );
     }
@@ -606,7 +612,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          'NOT_ROUTAIN_OWNER'
+          `You're not routain owner.`
         )
       );
     }
@@ -617,7 +623,7 @@ export class RoutainService {
           HttpStatus.BAD_REQUEST,
           'ALREADY_STOPPED_ROUTAIN',
           true,
-          'ALREADY_STOPPED_ROUTAIN'
+          'Already stopped routain.'
         )
       );
     }
@@ -641,7 +647,7 @@ export class RoutainService {
 
       return new ResponseDto(
         HttpStatus.ACCEPTED,
-        'Routain Stopped',
+        'SUCCESS',
         false,
         'Routain Stopped'
       );
@@ -672,7 +678,7 @@ export class RoutainService {
           HttpStatus.INTERNAL_SERVER_ERROR,
           'ROUTAIN_NOT_EXIST',
           true,
-          'ROUTAIN_NOT_EXIST'
+          'Routain not exist.'
         )
       );
     }
@@ -683,7 +689,7 @@ export class RoutainService {
           HttpStatus.UNAUTHORIZED,
           'NOT_ROUTAIN_OWNER',
           true,
-          'NOT_ROUTAIN_OWNER'
+          `You're not routain owner`
         )
       );
     }
@@ -707,7 +713,7 @@ export class RoutainService {
 
       return new ResponseDto(
         HttpStatus.ACCEPTED,
-        'Routain Skipped',
+        'SUCCESS',
         false,
         'Routain Skipped'
       );
