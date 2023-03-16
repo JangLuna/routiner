@@ -1,5 +1,5 @@
 # Routainer Introduction
-### This project is [JangLuna](https://github.com/JangLuna)'s personnal project.
+### This project is [JangLuna](https://github.com/Phantola)'s personnal project.
 ### Routainer is a self-manange web-service which for make a daily-routain with atomic habits.
 
 ## Tech-Stack
